@@ -269,11 +269,11 @@ def makeTFRecord(ipath, opath, file_comment):
 
 if __name__ == "__main__":
     # Define paths here:
-    ensemble_GRIB_path = "/ENS10_data/"  # folder containing ENS10 GRIB files
-    analysis_GRIB_path = "/ERA5_data/"   # folder containing ERA5 GRIB files
-    npy_output_path = "./npydata"        # folder to contain output the intermediate numpy files (need the folder to exist)
-    tfrecord_output_path = "./tfdata"    # folder to contain tfrecord files (need the folder to exist)
-    slice_level = 850                    # pressure level of the slice (850 or 500)
+    ensemble_GRIB_path = "./ENS10_data/"  # folder containing ENS10 GRIB files
+    analysis_GRIB_path = "./ERA5_data/"   # folder containing ERA5 GRIB files
+    npy_output_path = "./npydata/"        # folder to contain output the intermediate numpy files (need the folder to exist)
+    tfrecord_output_path = "./tfdata/"    # folder to contain tfrecord files (need the folder to exist)
+    slice_level = 850                     # pressure level of the slice (850 or 500)
 
     # main script:
     # ENS10 dataset GRIB to npy
