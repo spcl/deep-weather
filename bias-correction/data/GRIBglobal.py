@@ -10,13 +10,6 @@ SR = 48
 X_SUFFIX = "_x0"
 Y_SUFFIX = "_y" + str(SR)
 FILE_COMMENT = "plslice"
-# PATHI = "/mnt/data/weather/chyao/data/"
-# PATHI = "/mnt/data/weather/ETH_data/"
-# PATHO = "/mnt/data/weather/chyao/pl850slice48/"
-# PATHTF = "/mnt/data/weather/chyao/tf_pl850slice48/"
-PATHI = "/media/chengyuan/wpc/data/"
-PATHO = "/media/chengyuan/wpc/data/range/"
-PATHTF = "/media/chengyuan/wpc/data/tfdata/"
 XONLY_FLAG = True
 INCLUDE_Y = False   # Only if XONLY_FLAG is true, set to true if Y is in the data. XONLY_FLAG false doe not matter
 
@@ -143,12 +136,12 @@ def GRIBplslice(files, opathpre="plslice", level=850):
                 type2index=data_macro.global_pl_type2index, level2index={level: 0})
 
 
-def getMeanStd(ipath, normdim=(2, 3)):
+def getMeanStd(ipath, file_comment, normdim=(2, 3)):
     import glob
     import os
 
-    mean_file_path = ipath + "/mean_vec.npy"
-    std_file_path = ipath + "/std_vec.npy"
+    mean_file_path = ipath + "/mean_" + file_comment + ".npy"
+    std_file_path = ipath + "/std_" + file_comment + ".npy"
 
     if os.path.isfile(mean_file_path):
         os.remove(mean_file_path)
@@ -276,11 +269,11 @@ def makeTFRecord(ipath, opath, file_comment):
 
 if __name__ == "__main__":
     # Define paths here:
-    ensemble_GRIB_path = "/mnt/data/weather/ETH_data/"  # Ensemble GRIB files needs to be in the folder
-    analysis_GRIB_path = "/mnt/data/weather/chyao/data/"  # Analysis GRIB files needs to be in the folder
-    npy_output_path = "/mnt/data/weather/chyao/pl850slice48/"
-    tfrecord_output_path = "/mnt/data/weather/chyao/tf_pl850slice48/"
-    slice_level = 850  # pressure level of the slice
+    ensemble_GRIB_path = "/ENS10_data/"  # folder containing ENS10 GRIB files
+    analysis_GRIB_path = "/ERA5_data/"   # folder containing ERA5 GRIB files
+    npy_output_path = "./npydata"        # folder to contain output the intermediate numpy files (need the folder to exist)
+    tfrecord_output_path = "./tfdata"    # folder to contain tfrecord files (need the folder to exist)
+    slice_level = 850                    # pressure level of the slice (850 or 500)
 
     # main script:
     # ENS10 dataset GRIB to npy
@@ -299,6 +292,6 @@ if __name__ == "__main__":
     XONLY_FLAG = True
     GRIBplslice(files, level=slice_level)
     # get mean and std
-    getMeanStd(PATHO)
+    getMeanStd(PATHO,file_comment)
     # npy to TFRecord
     out = makeTFRecord(ipath=PATHO, opath=PATHTF, file_comment=file_comment)

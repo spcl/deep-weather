@@ -127,7 +127,7 @@ def plotHeatmap():
 
 
 if __name__ == "__main__":
-    plot = 1
+    plot = 0
     if plot:
         plotHeatmap()
     else:
