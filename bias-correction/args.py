@@ -73,17 +73,9 @@ def getModel(modelname, FLAGS, sess):
     from models.refmse import refmse
     from models.Unet3 import Unet3
     from models.Unet2 import Unet2
-    from models.Unet2_l2 import Unet2_l2
-    from models.conv_deconv import ConvDeconv
-    from models.resnet import ResNet
     from models.LCN import LCN
-    from models.simple_conv import LayerConv
     from models.tile_CNN import TileCNN
-    from models.inception import Inception
     from models.LCN_unet import LCN_unet
-    from models.model1 import model1
-    from models.model2 import model2
-    from models.dateModel import dateModel
     from models.Unet3_local import Unet3_local
     from models.Unet3_tile import Unet3_tile
     model_dic = {
@@ -91,17 +83,9 @@ def getModel(modelname, FLAGS, sess):
         'refmse': refmse,
         'unet3': Unet3,
         'unet2': Unet2,
-        'unet2_l2': Unet2_l2,
-        'conv_deconv': ConvDeconv,
-        'ResNet': ResNet,
         'LCN': LCN,
-        'LayerConv': LayerConv,
         'TileCNN': TileCNN,
-        'inception': Inception,
         'LCN_unet': LCN_unet,
-        'model1': model1,
-        'model2': model2,
-        'dateModel': dateModel,
         'unet3_local': Unet3_local,
         'unet3_tile': Unet3_tile
     }
