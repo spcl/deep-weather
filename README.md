@@ -1,6 +1,6 @@
 # Deep Learning for Post-Processing Ensemble Weather Forecasts 
  
-We make available the data as well as the code that is necessary to run the models in our [paper](https://arxiv.org/abs/2005.08748) trough this repository. It is our hope that this research and data can be used to further advance weather forecasting research.
+We make available the data as well as the code that is necessary to run the models in our [paper](https://arxiv.org/abs/2005.08748) through this repository. It is our hope that our findings and the data can be used to further advance weather forecasting research.
 
 ## Research description
 
@@ -11,10 +11,10 @@ Our research focuses on applying recent architectures from Deep Learning to Ense
 <img width="40%" src="/report/G_Winston_B5U5C-E10_step1.png">
 </p>
 
-In the example case of tropical cyclone [Winston](https://en.wikipedia.org/wiki/Cyclone_Winston), we achieve a relative improvement of over 26% in forecast skill, measured in Continuous Ranked Probability Score (CRPS) over the full 10 member ensemble, using a subset of five trajectories. Additionally, the models specifically predict the future path of the cyclone more accurately. 
+In the case of tropical cyclone [Winston](https://en.wikipedia.org/wiki/Cyclone_Winston) we achieve a relative improvement of over 26% in forecast skill, measured in Continuous Ranked Probability Score (CRPS) over the full 10 member ensemble, using a subset of five trajectories. Additionally, the models specifically predict the future path of the cyclone more accurately. 
 
 ## Dependencies
-In order to run our code, which is run using Python 3, through a virtual environment: Clone this repository, open a terminal, set the working directory to this directory and run:
+In order to run our code in Python 3 through a virtual environment: Clone this repository, open a terminal, set the working directory to this directory and run:
 ```bash
 python3 -m venv env
 source env/bin/activate
