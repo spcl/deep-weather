@@ -42,9 +42,9 @@ To make a combined prediction aimed at reducing the forecast skill (CRPS), set t
  - `\train.py` Runs training and validation operations on the model
  - `\Preprocessing` Contains all necessary files to transform GRIB files into TensorFlow records
     - `\GRIB2npy.py` Converts GRIB files to Numpy arrays, needs to be adjusted for the selected parameters
-    - `\npy2tfr.py` Converts the Numpy arrays to TensorFlow records and performs the standardization described in our paper
+    - `\npy2tfr.py` Converts the Numpy arrays to TensorFlow records and performs the Local Area-wise Standardization (LAS) described in our paper
     - `\preprocessing_parameters` Parameters for all preprocessing steps, be sure to edit the path folders
-    - `\means.npy` Precomputed means for the Local Area-wise Standardization (LAS) we used in our paper
+    - `\means.npy` Precomputed means for the LAS
     - `\stddevs.npy` Precomputed standard deviations for the LAS
 
 ## How to cite
