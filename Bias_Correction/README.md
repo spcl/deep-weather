@@ -1,3 +1,4 @@
+# Output Bias Correction
 ## A. Preprocessing pipeline
 1. In file bias-correction/data/GRIBglobal.py, in line 272-276, change the path variables. Keep tfrecord_output_path to be bias-correction/data//tfdata (since this is the default path for the models to read the data)
 1*. The default setting is to get the mean of the 10 ensembles. To change to 5 ensembles or other custom operations, the change can be made in the meanparse function.
