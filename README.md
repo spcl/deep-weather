@@ -26,7 +26,7 @@ Our raw GRIB data is available under the following links:
 - [ENS10](https://confluence.ecmwf.int/display/UDOC/ECMWF+ENS+for+Machine+Learning+%28ENS4ML%29+Dataset)
 - [ERA5](https://cds.climate.copernicus.eu/cdsapp#!/dataset/reanalysis-era5-pressure-levels?tab=form)
 
-To transform the data into Numpy arrays TensorFlow records, refer to our preprocessing steps.
+To transform the data into Numpy arrays and TensorFlow records, refer to our preprocessing steps.
 
 ## Contents
 
