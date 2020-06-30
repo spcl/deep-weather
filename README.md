@@ -32,16 +32,18 @@ pip install eccodes==0.9.5
 ```
 
 ## Data
-Our raw GRIB data is available under the following links:
+The raw GRIB data we used for our experiments is available under the [Deep Weather Dataset](http://spclstorage.inf.ethz.ch/~shigangli/deep-weather/).  
+
+For the full separate datasets refer to their original sources:
 - [ENS10](https://confluence.ecmwf.int/display/UDOC/ECMWF+ENS+for+Machine+Learning+%28ENS4ML%29+Dataset)
 - [ERA5](https://cds.climate.copernicus.eu/cdsapp#!/dataset/reanalysis-era5-pressure-levels?tab=form)
 
-To transform the data into Numpy arrays and TensorFlow records, refer to our preprocessing steps.
+To transform the Deep Weather data into Numpy arrays and TensorFlow records as done for our paper, refer to our preprocessing steps. If you want to use different parameters directly from the original sources you will have to edit the preprocessing scripts.
 
 ## Contents
 
 We separate our experiments into the exploration of ensemble output bias correction, which needs ERA5 data as the ground truth, and ensemble uncertainty forecasting using reduced ensemble members, which runs solely on ENS10 data.
-To make a combined prediction aimed at reducing the forecast skill (CRPS), set the appropriate flags in [parameters.py](Uncertainty_Quantification/parameters.py) additionally, provide a path to the bias corrected mean and ground truth in the appropriate form in [preprocessing_parameters.py](Uncertainty_Quantification/Preprocessing/preprocessing_parameters.py).
+To make a combined prediction aimed at reducing the forecast skill (CRPS), you will need to provide a path to the bias corrected mean and ground truth in the appropriate form in [preprocessing_parameters.py](Uncertainty_Quantification/Preprocessing/preprocessing_parameters.py), as well as set the CRPS flag there and in [parameters.py](Uncertainty_Quantification/parameters.py).
 
 ### Contents structure
 `Bias_Correction` Preprocessing and Model for Bias Correction, refer to `Bias_Correction/README.md`
