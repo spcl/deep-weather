@@ -41,7 +41,7 @@ To transform the data into Numpy arrays and TensorFlow records, refer to our pre
 ## Contents
 
 We separate our experiments into the exploration of ensemble output bias correction, which needs ERA5 data as the ground truth, and ensemble uncertainty forecasting using reduced ensemble members, which runs solely on ENS10 data.
-To make a combined prediction aimed at reducing the forecast skill (CRPS), set the appropriate flags in [parameters.py](Uncertainty_Quantification/parameters.py) additionally, provide a path to the bias corrected mean and ground truth in the appropriate form in [preprocessing_parameters.py](Uncertainty_Quantification/PreProcessing/preprocessing_parameters.py).
+To make a combined prediction aimed at reducing the forecast skill (CRPS), set the appropriate flags in [parameters.py](Uncertainty_Quantification/parameters.py) additionally, provide a path to the bias corrected mean and ground truth in the appropriate form in [preprocessing_parameters.py](Uncertainty_Quantification/Preprocessing/preprocessing_parameters.py).
 
 ### Contents structure
 `Bias_Correction` Preprocessing and Model for Bias Correction, refer to `Bias_Correction/README.md`
