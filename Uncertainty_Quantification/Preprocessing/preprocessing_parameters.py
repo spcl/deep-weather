@@ -2,7 +2,8 @@ import os
 
 
 
-GRIB_PATH = '/mnt/data/weather/ETH_data/'
+WORKERS = 5     # Number of parallel processes to use for preprocessing
+GRIB_PATH = '/mnt/data/weather/ETH_data/ENS10/' # Grib data path
 NPY_PATH = GRIB_PATH+'Preprocessed/'      # Numpy data path
 TFR_PATH = NPY_PATH+'tfr/'                              # TensorFlow Record data path
 CRPS_TEMP_PATH = '/mnt/data/weather/chyao/bias_corr_temp_ens5/'

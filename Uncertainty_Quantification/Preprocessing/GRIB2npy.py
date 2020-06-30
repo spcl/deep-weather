@@ -44,7 +44,7 @@ def calc(i):
         with open(FILE, "r") as fd:
 
             print(str(i)+' Year and index '+str(hi+1)+'/'+str(Nhours))
-            for ise in xrange(0, 46179): # hardcoded the number of GRIB messages per file, to avoid an initial iteration through the whole file
+            for ise in range(0, 46179): # hardcoded the number of GRIB messages per file, to avoid an initial iteration through the whole file
                 gidt = codes_grib_new_from_file(fd) # Get the next GRIB message
                 y = codes_get(gidt, "year")
                 lvl = codes_get(gidt, "ls.level")
@@ -87,5 +87,5 @@ def calc(i):
 
 
 # Preprocess GRIB files in parallel, set the amount of workers here
-pool = mp.Pool(5) # Uses a lot of RAM per worker
+pool = mp.Pool(preprocessing_parameters.WORKERS) # Uses a lot of RAM per worker
 pool.map(calc, list(range(1999,2018)))
