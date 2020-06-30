@@ -4,7 +4,10 @@ import tensorflow as tf
 import parameters
 import RESNET2D
 import numpy as np
+import os
 from tqdm import tqdm, trange #progressbar
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '0'
+tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
 
 tf.reset_default_graph()
