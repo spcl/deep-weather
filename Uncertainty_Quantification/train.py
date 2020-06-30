@@ -42,7 +42,7 @@ xdatav, ydatav = diterv.get_next()
 
 
 
-rnet = RESNET2D.Model(drop=0.0, should_pad=True)
+rnet = RESNET2D.Model(should_pad=True)
 init = tf.global_variables_initializer()
 saver = tf.train.Saver(tf.global_variables())
 config = tf.ConfigProto(
