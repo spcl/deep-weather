@@ -21,6 +21,15 @@ source env/bin/activate
 pip install -r requirements.txt
 ```
 
+We use tensorflow-gpu 1.14, therefore you will also need to install [CUDA 10.0](https://developer.nvidia.com/cuda-10.0-download-archive) and [cuDNN 7.4](https://developer.nvidia.com/cudnn) separately. You will need to register on Nvidia and select 7.4 from the cuDNN versions.  
+
+If you prefer using conda, which will install CUDA and cuDNN automatically, use the commands:  
+```
+conda create -y --name env python==3.7
+conda install --force-reinstall -y -q --name env -c conda-forge --file requirements.txt
+conda activate env
+```
+
 ## Data
 Our raw GRIB data is available under the following links:
 - [ENS10](https://confluence.ecmwf.int/display/UDOC/ECMWF+ENS+for+Machine+Learning+%28ENS4ML%29+Dataset)
