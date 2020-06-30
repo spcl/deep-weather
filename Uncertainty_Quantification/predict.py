@@ -11,10 +11,16 @@ tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 def TFRparser(example, intime = parameters.NR_TIMESTEPS, InputLength=parameters.INPUT_SIZEL, InputWidth=parameters.INPUT_SIZEW,
               InputDepth=parameters.INPUT_DEPTH, OutputLength=parameters.OUTPUT_SIZEL,
               OutputWidth=parameters.OUTPUT_SIZEW, OutputDepth=parameters.OUTPUT_DEPTH, NrChannels=parameters.NR_CHANNELS):
-    features = {
-            'Array': tf.FixedLenFeature([intime,NrChannels, InputDepth, InputWidth, InputLength], tf.float32),
-            'ArrayC': tf.FixedLenFeature([2,7, OutputDepth, OutputWidth, OutputLength], tf.float32)
-    }
+    if parameters.DO_CRPS:
+        features = {
+                'Array': tf.FixedLenFeature([intime, NrChannels, InputDepth, InputWidth, InputLength], tf.float32),
+                'ArrayC': tf.FixedLenFeature([1, OutputWidth, OutputLength], tf.float32)
+        }
+    else:
+        features = {
+                'Array': tf.FixedLenFeature([intime,NrChannels, InputDepth, InputWidth, InputLength], tf.float32),
+                'ArrayC': tf.FixedLenFeature([2,7, OutputDepth, OutputWidth, OutputLength], tf.float32)
+        }    
     parsedf = tf.parse_single_example(example, features)
     return parsedf['Array'], parsedf['ArrayC']
 
