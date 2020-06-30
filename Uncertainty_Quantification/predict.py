@@ -2,7 +2,11 @@ import tensorflow as tf
 import parameters
 import numpy as np
 import RESNET2D
+import os
 from tqdm import tqdm
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '0'
+tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
+
 
 def TFRparser(example, intime = parameters.NR_TIMESTEPS, InputLength=parameters.INPUT_SIZEL, InputWidth=parameters.INPUT_SIZEW,
               InputDepth=parameters.INPUT_DEPTH, OutputLength=parameters.OUTPUT_SIZEL,
