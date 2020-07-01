@@ -16,6 +16,7 @@ INCLUDE_Y = False   # Only if XONLY_FLAG is true, set to true if Y is in the dat
 
 def meanparse(array):
     return np.mean(array, axis=4)
+    # return np.mean(array[:,:,:,:,:5], axis=4)
 
 
 def GRIBextract(ifn, opathpre, type_L, height_L, type2index, level2index, parse=meanparse):
@@ -168,6 +169,15 @@ def getMeanStd(ipath, file_comment, normdim=(2, 3)):
     np.save(std_file_path, stdvec)
 
 
+def get_split_string(fstr):
+    flist = fstr.split("_")
+    suffix = flist[-1]
+    datastr = flist[-2]
+    prefix = "_".join(flist[:-2])
+    return prefix, datastr, suffix
+
+
+
 def getNextDateFile(filename, incr = 1):
     from datetime import date
     assert(incr < 30), "Not supporting large date increment for now"
@@ -175,7 +185,7 @@ def getNextDateFile(filename, incr = 1):
     assert(len(fsl) == 2), "File name containing not exactly one period (.)"
     fstr, extension = fsl
 
-    prefix, datestr, suffix = fstr.split("_")
+    prefix, datestr, suffix = get_split_string(fstr)
     assert(len(datestr) == 8)
     yy = int(datestr[:4])
     mm = int(datestr[4:6])
@@ -199,7 +209,7 @@ def getSelectedSuffix(filename, suffix):
     assert(len(fsl) == 2), "File name containing not exactly one period (.)"
     fstr, extension = fsl
 
-    prefix, datestr, _ = fstr.split("_")
+    prefix, datestr, _ = get_split_string(fstr)
     newfn = prefix + "_" + datestr + "_" + suffix + "." + extension
     return newfn
 
@@ -227,8 +237,8 @@ def getxyfilenames(ipath):
 def makeTFRecordyearly(ipath, opath, xyfns, year, file_comment):
     writer = tf.python_io.TFRecordWriter(opath + "tf_" + str(year) + "_" + file_comment)
     size = len(xyfns)
-    mean_file_path = ipath + "/mean_vec.npy"
-    std_file_path = ipath + "/std_vec.npy"
+    mean_file_path = ipath + "/mean_" + file_comment + ".npy"
+    std_file_path = ipath + "/std_" + file_comment + ".npy"
     mean = np.load(mean_file_path)
     std = np.load(std_file_path)
     assert (os.path.isfile(mean_file_path)), "Mean file does not exist!"
@@ -269,10 +279,10 @@ def makeTFRecord(ipath, opath, file_comment):
 
 if __name__ == "__main__":
     # Define paths here:
-    ensemble_GRIB_path = "./ENS10_data/"  # folder containing ENS10 GRIB files
-    analysis_GRIB_path = "./ERA5_data/"   # folder containing ERA5 GRIB files
-    npy_output_path = "./npydata/"        # folder to contain output the intermediate numpy files (need the folder to exist)
-    tfrecord_output_path = "./tfdata/"    # folder to contain tfrecord files (need the folder to exist)
+    ensemble_GRIB_path = "./ENS10_data/"  # folder containing ENS10 GRIB files (keep the slash at the end)
+    analysis_GRIB_path = "./ERA5_data/"   # folder containing ERA5 GRIB files (keep the slash at the end)
+    npy_output_path = "./npydata/"        # folder to contain output the intermediate numpy files (need the folder to exist, keep the slash at the end)
+    tfrecord_output_path = "./tfdata/"    # folder to contain tfrecord files (need the folder to exist, keep the slash at the end)
     slice_level = 850                     # pressure level of the slice (850 or 500)
 
     # main script:

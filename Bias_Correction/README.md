@@ -1,6 +1,7 @@
 # Output Bias Correction
+CUDA device is required to reproduce the result. 
 ## A. Preprocessing pipeline (from GRIB format to TFRecord)
-1. In file _Bias-Correction/data/GRIBglobal.py_, in line 272-276, change the path variables. Keep _tfrecord_output_path_ to be _Bias-Correction/data/tfdata_ (since this is the default path for the models to read the data)
+1. In file _Bias-Correction/data/GRIBglobal.py_, in line 282-286, change the path variables. It is recommended to keep _tfrecord_output_path_ to be _Bias-Correction/data/tfdata_ (since this is the default path for the models to read the data). If using other _tfrecord_output_path_, copying or soft link _Bias-Correction/data/tfdata_ is required.
 
 1*. The default setting is to get the mean of the 10 ensembles. To change to 5 ensembles or other custom operations, the change can be made in the meanparse function in _Bias-Correction/data/GRIBglobal.py_.
 
@@ -14,7 +15,7 @@
 
 2. Run commands to train the model, some examples of the commands are listed below. For details of the arguments, please check _Bias-Correction/args.py_
 
-3. check the trained models in _Bias-Correction/ckpt/<model>/<exp>_
+3. check the trained models in _Bias-Correction/ckpt/[model]/[exp]_
 
 ```
 UNET0:
@@ -30,7 +31,7 @@ python cross_validate.py unet3_local --unet_levels=2 --epoch=40 --nfilters=32 --
 ## C. Load the model and get corrected mean predictions
 1. Set the flag "resume_iter" to be the epoch run with the saved model. In order to use this method to load the model, experiment name, model needs to be the same as the training command.
 
-2. _main.py_ script default dumps out predictions on the daily basis (file names are the dates) to _Bias-Correction/log/<model>/<exp>_ in npy format. The output is a 3 grids with shape [3, 361, 720]. The first grid is the prediction of mean, the second grid is the numerical forecast (mean of the ensemble members), and the third grid is ERA5 ground truth. To customize the function to dump out predictions of different years, in line 37 of _main.py_ file, change the _year_test_ to be the the list of years to be predicted.
+2. _main.py_ script default dumps out predictions on the daily basis (file names are the dates) to _Bias-Correction/log/[model]/[exp]_ in npy format. The output is a 3 grids with shape [3, 361, 720]. The first grid is the prediction of mean, the second grid is the numerical forecast (mean of the ensemble members), and the third grid is ERA5 ground truth. To customize the function to dump out predictions of different years, in line 37 of _main.py_ file, change the _year_test_ to be the the list of years to be predicted.
 
 3. The output of the corrected mean predictions can be used further for the CRPS training.
 
