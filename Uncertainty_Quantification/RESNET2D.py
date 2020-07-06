@@ -86,10 +86,16 @@ class Model():
 
 
             # Feature selection + NWP initial Post-Processing steps
-            tp = self.model_input[:,:,:7,0,:,:]
+            if p_temp:
+                tp = self.model_input[:,:,:7,1,:,:]
+                t0 = self.model_input[:,:,7:,1,:,:]
+            else:
+                tp = self.model_input[:,:,:7,0,:,:]
+                t0 = self.model_input[:,:,7:,0,:,:]
+                
             tp = tf.reshape(tp, shape=(-1,timesteps*7,out_sizew, out_sizel))
             cp = self.conv_batch_relu(tp,3,kernel=[1,1],stride=[1,1], is_training=self.training)
-            t0 = self.model_input[:,:,7:,0,:,:]
+            
             if p_temp:
                 tgo = t0[:, :, None, 0, :, :]
             else:
