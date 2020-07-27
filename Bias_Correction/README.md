@@ -17,6 +17,8 @@ CUDA device is required to reproduce the result.
 
 3. check the trained models in _Bias-Correction/ckpt/[model]/[exp]_
 
+4. For LCN with reg, alpha is the strength of the regularization. To reproduce the result in the paper, set alpha to be 1e1 (regularize needs to be True). 
+
 ```
 UNET0:
 python cross_validate.py unet3 --unet_levels=0 --epoch=40 --nfilters=32 --val_interval=2 --save_interval=10 --lr=5e-4  --plot=False --batch_size=2 --exp=formal_l0_32_geo --crop=False --crop_stack=False --recompute=0 | tee unet_l0_32
