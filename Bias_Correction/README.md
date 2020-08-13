@@ -1,9 +1,7 @@
 # Output Bias Correction
 CUDA device is required to reproduce the result. 
 ## A. Preprocessing pipeline (from GRIB format to TFRecord)
-1. In file _Bias-Correction/data/GRIBglobal.py_, in line 282-286, change the path variables. It is recommended to keep _tfrecord_output_path_ to be _Bias-Correction/data/tfdata_ (since this is the default path for the models to read the data). If using other _tfrecord_output_path_, copying or soft link _Bias-Correction/data/tfdata_ is required.
-
-1*. The default setting is to get the mean of the 10 ensembles. To change to 5 ensembles or other custom operations, the change can be made in the meanparse function in _Bias-Correction/data/GRIBglobal.py_.
+1. In file _Bias-Correction/data/GRIBglobal.py_, in line 282-286, change the path variables. It is recommended to keep _tfrecord_output_path_ to be _Bias-Correction/data/tfdata_ (since this is the default path for the models to read the data). If using other _tfrecord_output_path_, copying or soft link _Bias-Correction/data/tfdata_ is required. (Optional) The default setting is to get the mean of the 5 ensembles. To change to other number of ensembles, the change can be made in the meanparse function in _Bias-Correction/data/GRIBglobal.py_.
 
 2. Run python script GRIBglobal.py. The time for processing is expected to be very long (can be around 16 hours).
 

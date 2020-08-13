@@ -15,8 +15,8 @@ INCLUDE_Y = False   # Only if XONLY_FLAG is true, set to true if Y is in the dat
 
 
 def meanparse(array):
-    return np.mean(array, axis=4)
-    # return np.mean(array[:,:,:,:,:5], axis=4)
+    # return np.mean(array, axis=4)  # mean of 10 ensembles
+    return np.mean(array[:,:,:,:,:5], axis=4)  # mean of the first 5 ensembles
 
 
 def GRIBextract(ifn, opathpre, type_L, height_L, type2index, level2index, parse=meanparse):
@@ -206,9 +206,9 @@ def getNextDateFile(filename, incr = 1):
 
 def getSelectedSuffix(filename, suffix):
     fsl = filename.split(".")
-    assert(len(fsl) == 2), "File name containing not exactly one period (.)"
-    fstr, extension = fsl
-
+    # assert(len(fsl) == 2), "File name containing not exactly one period (.)"
+    extension = fsl[-1]
+    fstr = ".".join(fsl[:-1])
     prefix, datestr, _ = get_split_string(fstr)
     newfn = prefix + "_" + datestr + "_" + suffix + "." + extension
     return newfn
