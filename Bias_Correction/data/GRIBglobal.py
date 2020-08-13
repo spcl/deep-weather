@@ -182,8 +182,8 @@ def getNextDateFile(filename, incr = 1):
     from datetime import date
     assert(incr < 30), "Not supporting large date increment for now"
     fsl = filename.split(".")
-    assert(len(fsl) == 2), "File name containing not exactly one period (.)"
-    fstr, extension = fsl
+    extension = fsl[-1]
+    fstr = ".".join(fsl[:-1])
 
     prefix, datestr, suffix = get_split_string(fstr)
     assert(len(datestr) == 8)
