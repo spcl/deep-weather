@@ -32,7 +32,7 @@ pip install eccodes==0.9.5
 ```
 
 ## Data
-The raw GRIB data we used for our experiments is available under the [Deep Weather Dataset](http://spclstorage.inf.ethz.ch/~shigangli/deep-weather/).  
+The raw GRIB data we used for our experiments is available under the [Deep Weather Dataset](http://spclstorage.inf.ethz.ch/projects/deep-weather/).  
 
 For the full separate datasets refer to their original sources:
 - [ENS10](https://confluence.ecmwf.int/display/UDOC/ECMWF+ENS+for+Machine+Learning+%28ENS4ML%29+Dataset)
