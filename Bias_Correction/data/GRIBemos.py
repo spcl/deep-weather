@@ -173,8 +173,8 @@ def getNextDateFile(filename, incr = 1):
     from datetime import date
     assert(incr < 30), "Not supporting large date increment for now"
     fsl = filename.split(".")
-    assert(len(fsl) == 2), "File name containing not exactly one period (.)"
-    fstr, extension = fsl
+    extension = fsl[-1]
+    fstr = ".".join(fsl[:-1])
     prefix = "_".join(fstr.split("_")[:-2])
     datestr, suffix = fstr.split("_")[-2:]
     assert(len(datestr) == 8)
@@ -197,8 +197,8 @@ def getNextDateFile(filename, incr = 1):
 
 def getSelectedSuffix(filename, suffix):
     fsl = filename.split(".")
-    assert(len(fsl) == 2), "File name containing not exactly one period (.)"
-    fstr, extension = fsl
+    extension = fsl[-1]
+    fstr = ".".join(fsl[:-1])
 
     prefix = "_".join(fstr.split("_")[:-2])
     datestr, _ = fstr.split("_")[-2:]
@@ -206,8 +206,6 @@ def getSelectedSuffix(filename, suffix):
     return newfn
 
 
-# HACK
-# The suffix and incr here are subjective to change
 def getSample(filename):
     suffix = "y" + str(SR)
     y48 = getSelectedSuffix(filename, suffix)

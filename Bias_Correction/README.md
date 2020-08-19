@@ -1,5 +1,21 @@
+# EMOS Baseline reproduction
+## A. Get 5 ensembles
+1. In file _Bias-Correction/data/GRIBemos.py ...
+
+2. Run python script GRIBemos.py, the run time is expected to be long.
+
+## B. Running the model
+1. In _Bias-Correction/config.py_ set the boolean variable emos (line6) to be True. Set tempGeo (line4) to be True if running on T850, False if running on Z500. 
+
+2. Run commands to train the model
+
+```
+python emos_main.py emos --epoch=9 --lr=5e-3 --batch_size=32
+```
+
+
 # Output Bias Correction
-CUDA device is required to reproduce the result. 
+CUDA device and CuDNN is required to reproduce the result. 
 ## A. Preprocessing pipeline (from GRIB format to TFRecord)
 1. In file _Bias-Correction/data/GRIBglobal.py_, in line 282-286, change the path variables. It is recommended to keep _tfrecord_output_path_ to be _Bias-Correction/data/tfdata_ (since this is the default path for the models to read the data). If using other _tfrecord_output_path_, copying or soft link _Bias-Correction/data/tfdata_ is required. (Optional) The default setting is to get the mean of the 5 ensembles. To change to other number of ensembles, the change can be made in the meanparse function in _Bias-Correction/data/GRIBglobal.py_.
 

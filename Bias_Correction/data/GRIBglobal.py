@@ -214,8 +214,6 @@ def getSelectedSuffix(filename, suffix):
     return newfn
 
 
-# HACK
-# The suffix and incr here are subjective to change
 def getSample(filename):
     suffix = "y" + str(SR)
     y48 = getSelectedSuffix(filename, suffix)
