@@ -1,6 +1,6 @@
 # EMOS Baseline reproduction
 ## A. Get 5 ensembles
-1. In file _Bias-Correction/data/GRIBemos.py ...
+1. In file _Bias-Correction/data/GRIBemos.py line 260-264 change the variables accordingly
 
 2. Run python script GRIBemos.py, the run time is expected to be long.
 
@@ -10,7 +10,7 @@
 2. Run commands to train the model
 
 ```
-python emos_main.py emos --epoch=9 --lr=5e-3 --batch_size=32
+python emos_main.py emos --epoch=9 --lr=5e-3 --val_interval=1 --batch_size=32
 ```
 
 
