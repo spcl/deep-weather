@@ -78,6 +78,8 @@ def getModel(modelname, FLAGS, sess):
     from models.LCN_unet import LCN_unet
     from models.Unet3_local import Unet3_local
     from models.Unet3_tile import Unet3_tile
+    from models.emos import emos
+    from models.refcrps import refcrps
     model_dic = {
         'one2one': one2one,
         'refmse': refmse,
@@ -87,7 +89,9 @@ def getModel(modelname, FLAGS, sess):
         'TileCNN': TileCNN,
         'LCN_unet': LCN_unet,
         'unet3_local': Unet3_local,
-        'unet3_tile': Unet3_tile
+        'unet3_tile': Unet3_tile,
+        'emos' : emos,
+        'refcrps' : refcrps,
     }
     if modelname in model_dic:
         model = model_dic[modelname](sess, FLAGS, file_comment)

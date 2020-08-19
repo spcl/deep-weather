@@ -3,6 +3,8 @@ import tensorflow as tf
 # the only high level variable is here:
 tempGeo = True  # if true, perform temperature at 850hPa; if false, perform geo at 500hPa
 norm = False
+ens5 = False
+emos = False
 
 if tempGeo:
     file_comment = "pl850slice48"
@@ -10,7 +12,9 @@ else:
     file_comment = "pl500slice48"
 if norm:
     file_comment = file_comment + '_nor'
-# file_comment = "pl"
+if ens5:
+    file_comment = file_comment +'_ens5'
+
 
 pos_emb_len = 8*2
 if file_comment == "pl_pos_24_small":
@@ -26,6 +30,15 @@ if file_comment == "plslice" or "pl500slice48" in file_comment or "pl850slice48"
 elif file_comment == "pl":
     X_SHAPE = (None, 14, 11, 361, 720)
     Y_SHAPE = (None, 7, 11, 361, 720)
+
+if emos:
+    if tempGeo:
+        file_comment = "emos850slice48"
+    else:
+        file_comment = "emos500slice48"
+    X_SHAPE = (None, 1, 361, 720, 5)
+    Y_SHAPE = (None, 1, 361, 720)
+
 
 
 def parse_normal(example):

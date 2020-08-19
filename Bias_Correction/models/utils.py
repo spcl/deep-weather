@@ -269,7 +269,10 @@ class base_model():
                     self.train_op = trainer.apply_gradients(zip(grads, vrs))
                 else:
                     print("INFO: Disable recomputation")
-                    self.train_op = trainer.minimize(self.loss)
+                    try:
+                        self.train_op = trainer.minimize(self.loss)
+                    except:
+                        self.train_op = self.loss
             # self.train_op = tf.train.AdamOptimizer(learning_rate=lr).minimize(self.loss)
 
     def run(self, iter_data, iter_val=None, train=None, load=False):
