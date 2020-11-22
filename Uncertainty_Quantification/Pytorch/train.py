@@ -22,14 +22,16 @@ def main():
     parser.add_argument("--augmentation", nargs="+", default=["RandomCrop","RandomHorizontalFlip","RandomVerticalFlip","Transpose"])
     parser.add_argument("--pressure_levels", nargs="+", default=[500,850])
     parser.add_argument("--time_steps",nargs="+",default=[0,24,48])
-    parser.add_argument("--crop_x", type=int,default=256)
-    parser.add_argument("--crop_y", type=int,default=256)
+    parser.add_argument("--crop_lon", type=int,default=256)
+    parser.add_argument("--crop_lat", type=int,default=256)
     parser.add_argument("--batch_size", type=int, default=8)
     parser.add_argument("--base_lr", type=float, default=1e-6)
     parser.add_argument("--max_lr", type=float, default=1e-3)
     parser.add_argument("--num_workers", type=int, default=10)
     parser.add_argument("--checkpoint_start", type=str, default=None)
     parser.add_argument("--grad_accumulation", type=int, default=1)
+    parser.add_argument("--pred_type", type=str, default="Temperature")
+    parser.add_argument("--aggr_type", type=str, default="Mean")
 
     #if temp_args.model_name == "3DUNet":
     #    parser = 3dunet.add_model_specific_args(parser)

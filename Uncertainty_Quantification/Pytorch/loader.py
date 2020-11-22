@@ -1,12 +1,13 @@
 import os
 import torch
 import numpy as np
+import re
 from torch.utils.data import Dataset, DataLoader
 
 import pytorch_lightning as pl
 
 from .utils import(
-    generate_filelist,
+    reduce_sample_y,
     random_crop,
     horizontal_flip,
     vertical_flip,
@@ -32,10 +33,10 @@ class Weatherdataset(Dataset):
         self.datalist_x.sort()
         self.datalist_y.sort()
 
-        self.length = len(datalist_x)
+        self.length = len(self.datalist_x)
 
         if not infer:
-            assert(self.length==len(datalist_y)), "number of input samples has to match the number of output samples"
+            assert(self.length==len(self.datalist_y)), "number of input samples has to match the number of output samples"
 
         self.infer = infer
         self.step = step
@@ -46,17 +47,20 @@ class Weatherdataset(Dataset):
     def __getitem__(self, idx):
         
         data_x = np.load(self.datalist_x[idx])
+        data_x = np.reshape(data_x,[data_x.shape[0]*data_x.shape[1]*data_x.shape[2],data_x.shape[3],data_x.shape[4],data_x.shape[5]])
         #TODO use standardize maps here
-        if not self.infer and step =="train":
+        if not self.infer and self.step =="train":
             data_y = np.load(self.datalist_y[idx])
+            data_y = reduce_sample_y(data_y,self.args)
             #TODO possibly standardize output here
-            for aug in self.args.augmentation # Apply transformations if chosen
+            for aug in self.args.augmentation: # Apply transformations if chosen
                 data_x, data_y = TRANSFORMATION_DICTIONARY[aug](data_x, data_y, self.args)
 
             return torch.from_numpy(data_x), torch.from_numpy(data_y)
         else:
             if self.step == "val" or self.step == "test":
                 data_y = np.load(self.datalist_y[idx])
+                data_y = reduce_sample_y(data_y,self.args)
                 #TODO possibly standardize output here
                 return torch.from_numpy(data_x), torch.from_numpy(data_y)
             return torch.from_numpy(data_x)
