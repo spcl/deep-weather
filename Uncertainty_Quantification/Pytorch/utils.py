@@ -1,8 +1,4 @@
-    random_crop,
-    horizontal_flip,
-    vertical_flip,
-    transpose,
-
+import numpy as np
 import random
 
 def reduce_sample_y(data_y, args):
