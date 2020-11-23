@@ -47,6 +47,18 @@ def main():
             "Transpose",
         ],
     )
+    parser.add_argument(
+        "--max_lat",
+        type=int,
+        default=352,
+        help="Maximum latitude used as crop limit to allow for down and upscaling",
+    )
+    parser.add_argument(
+        "--max_lon",
+        type=int,
+        default=704,
+        help="Maximum longitude used as crop limit to allow for down and upscaling",
+    )
     parser.add_argument("--pressure_levels", nargs="+", default=[500, 850])
     parser.add_argument("--plvl_used", type=int, default=1)
     parser.add_argument("--time_steps", nargs="+", default=[0, 24, 48])
@@ -61,6 +73,12 @@ def main():
     parser.add_argument("--grad_accumulation", type=int, default=1)
     parser.add_argument("--pred_type", type=str, default="Temperature")
     parser.add_argument("--aggr_type", type=str, default="Mean")
+    parser.add_argument(
+        "--std_folder",
+        type=str,
+        default="/users/petergro/std",
+        help="Folder with the means.npy and stddevs.npy files generated in the data generation",
+    )
     parser.add_argument(
         "--fix_split",
         type=bool,

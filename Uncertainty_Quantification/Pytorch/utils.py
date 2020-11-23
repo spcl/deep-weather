@@ -2,6 +2,14 @@ import numpy as np
 import random
 
 
+def standardize(x, means, stddevs):
+    return (x - means) / stddevs
+
+
+def unstandardize(x, means, stddevs):
+    return x * stddevs + means
+
+
 def reduce_sample_y(data_y, args):
     ind = 1 if args.aggr_type == "Mean" else 0
     data_y = data_y[ind, None, args.parameters.index(args.pred_type), :, :, :]

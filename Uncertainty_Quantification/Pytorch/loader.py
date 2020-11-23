@@ -12,6 +12,7 @@ from utils import (
     horizontal_flip,
     vertical_flip,
     transpose,
+    standardize,
 )
 
 TRANSFORMATION_DICTIONARY = {
@@ -38,10 +39,28 @@ class WeatherDataset(Dataset):
             for i in data_list
             if any(j in i for j in pat_y)
         ]
-        # pattern_x = re.compile("inputLST[0-9]")
-        # pattern_y = re.compile("inputLSTC")
-        # self.datalist_x = [i for i in data_list if not (pattern_x.match(i) is None)]
-        # self.datalist_y = [i for i in data_list if not (pattern_y.match(i) is None)]
+        self.means = np.load(os.path.join(args.std_folder, "means.npy")).astype(
+            np.float32
+        )
+        self.stddevs = np.load(os.path.join(args.std_folder, "stddevs.npy")).astype(
+            np.float32
+        )
+        self.means = self.means[
+            0,
+            None,
+            args.parameters.index(args.pred_type),
+            :,
+            : self.args.max_lat,
+            : self.args.max_lon,
+        ]
+        self.stddevs = self.stddevs[
+            0,
+            None,
+            args.parameters.index(args.pred_type),
+            :,
+            : self.args.max_lat,
+            : self.args.max_lon,
+        ]
         self.datalist_x.sort()
         self.datalist_y.sort()
 
@@ -71,14 +90,14 @@ class WeatherDataset(Dataset):
             ],
         )
         # crop to work with 5 pooling operations
-        data_x = data_x[:, :, :352, :704]
-        # TODO use standardize maps here
+        data_x = data_x[:, :, : self.args.max_lat, : self.args.max_lon]
+        data_x = standardize(data_x, self.means, self.stddevs)
         if not self.infer and self.step == "train":
             data_y = np.load(self.datalist_y[idx])
             data_y = reduce_sample_y(data_y, self.args)
             # crop to work with 5 pooling operations
-            data_y = data_y[:, :, :352, :704]
-            # TODO possibly standardize output here
+            data_y = data_y[:, :, : self.args.max_lat, : self.args.max_lon]
+            data_y = standardize(data_y, self.means, self.stddevs)
             for aug in self.args.augmentation:  # Apply transformations if chosen
                 data_x, data_y = TRANSFORMATION_DICTIONARY[aug](
                     data_x, data_y, self.args
@@ -90,8 +109,8 @@ class WeatherDataset(Dataset):
                 data_y = np.load(self.datalist_y[idx])
                 data_y = reduce_sample_y(data_y, self.args)
                 # crop to work with 5 pooling operations
-                data_y = data_y[:, :, :352, :704]
-                # TODO possibly standardize output here
+                data_y = data_y[:, :, : self.args.max_lat, : self.args.max_lon]
+                data_y = standardize(data_y, self.means, self.stddevs)
                 return torch.from_numpy(data_x), torch.from_numpy(data_y)
             return torch.from_numpy(data_x)
 
