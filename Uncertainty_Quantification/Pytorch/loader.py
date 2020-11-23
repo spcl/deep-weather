@@ -6,7 +6,7 @@ from torch.utils.data import Dataset, DataLoader
 
 import pytorch_lightning as pl
 
-from .utils import(
+from utils import (
     reduce_sample_y,
     random_crop,
     horizontal_flip,
@@ -20,6 +20,7 @@ TRANSFORMATION_DICTIONARY = {
     "RandomVerticalFlip": vertical_flip,
     "Transpose": transpose,
 }
+
 
 class Weatherdataset(Dataset):
     def __init__(self, args, step="train", infer=False):
@@ -36,7 +37,9 @@ class Weatherdataset(Dataset):
         self.length = len(self.datalist_x)
 
         if not infer:
-            assert(self.length==len(self.datalist_y)), "number of input samples has to match the number of output samples"
+            assert self.length == len(
+                self.datalist_y
+            ), "number of input samples has to match the number of output samples"
 
         self.infer = infer
         self.step = step
@@ -45,43 +48,72 @@ class Weatherdataset(Dataset):
         return self.length
 
     def __getitem__(self, idx):
-        
+
         data_x = np.load(self.datalist_x[idx])
-        data_x = np.reshape(data_x,[data_x.shape[0]*data_x.shape[1]*data_x.shape[2],data_x.shape[3],data_x.shape[4],data_x.shape[5]])
-        #TODO use standardize maps here
-        if not self.infer and self.step =="train":
+        data_x = np.reshape(
+            data_x,
+            [
+                data_x.shape[0] * data_x.shape[1] * data_x.shape[2],
+                data_x.shape[3],
+                data_x.shape[4],
+                data_x.shape[5],
+            ],
+        )
+        # TODO use standardize maps here
+        if not self.infer and self.step == "train":
             data_y = np.load(self.datalist_y[idx])
-            data_y = reduce_sample_y(data_y,self.args)
-            #TODO possibly standardize output here
-            for aug in self.args.augmentation: # Apply transformations if chosen
-                data_x, data_y = TRANSFORMATION_DICTIONARY[aug](data_x, data_y, self.args)
+            data_y = reduce_sample_y(data_y, self.args)
+            # TODO possibly standardize output here
+            for aug in self.args.augmentation:  # Apply transformations if chosen
+                data_x, data_y = TRANSFORMATION_DICTIONARY[aug](
+                    data_x, data_y, self.args
+                )
 
             return torch.from_numpy(data_x), torch.from_numpy(data_y)
         else:
             if self.step == "val" or self.step == "test":
                 data_y = np.load(self.datalist_y[idx])
-                data_y = reduce_sample_y(data_y,self.args)
-                #TODO possibly standardize output here
+                data_y = reduce_sample_y(data_y, self.args)
+                # TODO possibly standardize output here
                 return torch.from_numpy(data_x), torch.from_numpy(data_y)
             return torch.from_numpy(data_x)
 
+
 class WDatamodule(pl.LightningDataModule):
-    def __init__(self,args):
+    def __init__(self, args):
         super().__init__()
         self.train_dims = None
 
     def load_datasets(self, args):
-        return self.train_dataloader(args), self.val_dataloader(args), self.test_dataloader(args)
-    
+        return (
+            self.train_dataloader(args),
+            self.val_dataloader(args),
+            self.test_dataloader(args),
+        )
+
     def setup(self, args):
         self.train, self.val, self.test = self.load_datasets(args)
-    
+
     def train_dataloader(self, args):
-        return DataLoader(Weatherdataset(args, step="train"), batch_size=args.batch_size,num_workers=args.num_workers,shuffle=True)
+        return DataLoader(
+            Weatherdataset(args, step="train"),
+            batch_size=args.batch_size,
+            num_workers=args.num_workers,
+            shuffle=True,
+        )
 
     def val_dataloader(self, args):
-        return DataLoader(Weatherdataset(args, step="val"), batch_size=args.batch_size,num_workers=args.num_workers,shuffle=False)
+        return DataLoader(
+            Weatherdataset(args, step="val"),
+            batch_size=args.batch_size,
+            num_workers=args.num_workers,
+            shuffle=False,
+        )
 
     def test_dataloader(self, args):
-        return DataLoader(Weatherdataset(args, step="test"), batch_size=args.batch_size,num_workers=args.num_workers,shuffle=True)
-
+        return DataLoader(
+            Weatherdataset(args, step="test"),
+            batch_size=args.batch_size,
+            num_workers=args.num_workers,
+            shuffle=True,
+        )
