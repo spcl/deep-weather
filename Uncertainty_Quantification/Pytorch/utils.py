@@ -4,7 +4,7 @@ import random
 
 def reduce_sample_y(data_y, args):
     ind = 1 if args.aggr_type == "Mean" else 0
-    data_y = data_y[ind, None, args.parameters.index(args.param_type), :, :, :]
+    data_y = data_y[ind, None, args.parameters.index(args.pred_type), :, :, :]
     return data_y
 
 
@@ -15,7 +15,6 @@ def random_crop(data_x, data_y, args):
     lon = random.randint(0, max_lon)
     data_x = data_x[:, :, lat : lat + args.crop_lat, lon : lon + args.crop_lon]
     data_y = data_y[:, :, lat : lat + args.crop_lat, lon : lon + args.crop_lon]
-
     return data_x, data_y
 
 

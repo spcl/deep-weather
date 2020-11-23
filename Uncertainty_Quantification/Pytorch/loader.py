@@ -22,15 +22,26 @@ TRANSFORMATION_DICTIONARY = {
 }
 
 
-class Weatherdataset(Dataset):
-    def __init__(self, args, step="train", infer=False):
+class WeatherDataset(Dataset):
+    def __init__(self, args, step="train", infer=False, year_dict=None):
         self.args = args
-        directory = os.path.join(args.data_dir, step)
-        data_list = os.listdir(directory)
-        pattern_x = re.compile("inputLST[0-9]")
-        pattern_y = re.compile("inputLSTC")
-        self.datalist_x = [i for i in data_list if not (pattern_x.match(i) is None)]
-        self.datalist_y = [i for i in data_list if not (pattern_y.match(i) is None)]
+        data_list = os.listdir(args.data_directory)
+        pat_x = ["inputLST" + i for i in year_dict[step]]
+        pat_y = ["inputLSTC" + i for i in year_dict[step]]
+        self.datalist_x = [
+            os.path.join(args.data_directory, i)
+            for i in data_list
+            if any(j in i for j in pat_x)
+        ]
+        self.datalist_y = [
+            os.path.join(args.data_directory, i)
+            for i in data_list
+            if any(j in i for j in pat_y)
+        ]
+        # pattern_x = re.compile("inputLST[0-9]")
+        # pattern_y = re.compile("inputLSTC")
+        # self.datalist_x = [i for i in data_list if not (pattern_x.match(i) is None)]
+        # self.datalist_y = [i for i in data_list if not (pattern_y.match(i) is None)]
         self.datalist_x.sort()
         self.datalist_y.sort()
 
@@ -59,30 +70,37 @@ class Weatherdataset(Dataset):
                 data_x.shape[5],
             ],
         )
+        # crop to work with 5 pooling operations
+        data_x = data_x[:, :, :352, :704]
         # TODO use standardize maps here
         if not self.infer and self.step == "train":
             data_y = np.load(self.datalist_y[idx])
             data_y = reduce_sample_y(data_y, self.args)
+            # crop to work with 5 pooling operations
+            data_y = data_y[:, :, :352, :704]
             # TODO possibly standardize output here
             for aug in self.args.augmentation:  # Apply transformations if chosen
                 data_x, data_y = TRANSFORMATION_DICTIONARY[aug](
                     data_x, data_y, self.args
                 )
 
-            return torch.from_numpy(data_x), torch.from_numpy(data_y)
+            return torch.from_numpy(data_x.copy()), torch.from_numpy(data_y.copy())
         else:
             if self.step == "val" or self.step == "test":
                 data_y = np.load(self.datalist_y[idx])
                 data_y = reduce_sample_y(data_y, self.args)
+                # crop to work with 5 pooling operations
+                data_y = data_y[:, :, :352, :704]
                 # TODO possibly standardize output here
                 return torch.from_numpy(data_x), torch.from_numpy(data_y)
             return torch.from_numpy(data_x)
 
 
 class WDatamodule(pl.LightningDataModule):
-    def __init__(self, args):
+    def __init__(self, args, year_dict=None):
         super().__init__()
         self.train_dims = None
+        self.year_dict = year_dict
 
     def load_datasets(self, args):
         return (
@@ -96,7 +114,7 @@ class WDatamodule(pl.LightningDataModule):
 
     def train_dataloader(self, args):
         return DataLoader(
-            Weatherdataset(args, step="train"),
+            WeatherDataset(args, step="train", year_dict=self.year_dict),
             batch_size=args.batch_size,
             num_workers=args.num_workers,
             shuffle=True,
@@ -104,7 +122,7 @@ class WDatamodule(pl.LightningDataModule):
 
     def val_dataloader(self, args):
         return DataLoader(
-            Weatherdataset(args, step="val"),
+            WeatherDataset(args, step="val", year_dict=self.year_dict),
             batch_size=args.batch_size,
             num_workers=args.num_workers,
             shuffle=False,
@@ -112,7 +130,7 @@ class WDatamodule(pl.LightningDataModule):
 
     def test_dataloader(self, args):
         return DataLoader(
-            Weatherdataset(args, step="test"),
+            WeatherDataset(args, step="test", year_dict=self.year_dict),
             batch_size=args.batch_size,
             num_workers=args.num_workers,
             shuffle=True,

@@ -19,7 +19,9 @@ BASE_FILTER = 16
 class MSSSIMLoss(LightningModule):
     def __init__(self):
         super(MSSSIMLoss, self).__init__()
-        self.msssim = MS_SSIM(data_range=1.0)
+        self.msssim = MS_SSIM(
+            data_range=60.0, channel=2
+        )  # after standardization ~0+-60 through analysis, channel = 2 for 2 pressure levels
 
     def forward(self, x, target):
         return 1.0 - self.msssim(x, target)
@@ -33,7 +35,9 @@ class MixLoss(LightningModule):
         self.alpha = alpha
 
     def forward(self, x, target):
-        return (1.0 - self.alpha) * self.loss(x, target) + self.alpha * self.loss2(
+        x = x[:, 0, :, :, :]
+        target = target[:, 0, :, :, :]
+        return (1.0 - self.alpha) * self.loss1(x, target) + self.alpha * self.loss2(
             x, target
         )
 
@@ -51,12 +55,12 @@ def activation(x):
 
 # 1x2x2 max pool function
 def pool(x):
-    return F.max_pool2d(x, kernel_size=[1, 2, 2], stride=[2, 2, 1])
+    return F.max_pool3d(x, kernel_size=[1, 2, 2], stride=[1, 2, 2])
 
 
 # 1x2x2 nearest-neighbor upsample function
 def upsample(x):
-    return F.interpolate(x, scale_factor=[1, 2, 2], mode="bilinear")
+    return F.interpolate(x, scale_factor=[1, 2, 2], mode="trilinear")
 
 
 # Channel concatenation function
@@ -67,9 +71,9 @@ def concat(a, b):
 # Basic UNet Model
 
 
-class UNet(LightningModule):
+class unet3d(LightningModule):
     def __init__(self, sample_nr, base_lr, max_lr, in_channels=7, out_channels=1):
-        super(UNet, self).__init__()
+        super(unet3d, self).__init__()
 
         self.half_cycle_nr = sample_nr // 2
         self.base_lr = base_lr
@@ -170,39 +174,41 @@ class UNet(LightningModule):
             max_lr=self.max_lr,
             step_size_up=self.half_cycle_nr,
             step_size_down=None,
-            mode="triangluar2",
+            mode="triangular2",
             gamma=1.0,
             scale_fn=None,
             scale_mode="cycle",
             cycle_momentum=False,
         )
-        return [optimizer]
+        return [optimizer], [scheduler]
 
     def training_step(self, batch, batch_idx):
         logger.debug("Processing training batch %s", batch_idx)
         x, y = batch
         out = self(x)
         loss = self.loss_fct(out, y)
-        result = pl.TrainResult(loss, checkpoint_on=loss, early_stop_on=loss)
-        result.log(
-            "train_loss",
-            loss,
-            on_step=True,
-            on_epoch=False,
-            prog_bar=False,
-            logger=True,
-            reduce_fx=torch.mean,
+        self.log(
+            "train_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True
         )
         return loss
 
     def validation_step(self, batch, batch_idx):
+        logger.debug("Processing validation batch %s", batch_idx)
+        x, y = batch
+        out = self(x)
+        loss = self.loss_fct(out, y)
+        self.log(
+            "val_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True
+        )
+
+    def test_step(self, batch, batch_idx):
         logger.debug("Processing test batch %s", batch_idx)
         x, y = batch
         out = self(x)
         loss = self.loss_fct(out, y)
-        result = pl.EvalResult()
-        result.log("test_loss", loss)
-        return result
+        self.log(
+            "test_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True
+        )
 
     @staticmethod
     def add_model_specific_args(parent_parser):
