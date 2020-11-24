@@ -152,5 +152,5 @@ class WDatamodule(pl.LightningDataModule):
             WeatherDataset(args, step="test", year_dict=self.year_dict),
             batch_size=args.batch_size,
             num_workers=args.num_workers,
-            shuffle=True,
+            shuffle=False,
         )

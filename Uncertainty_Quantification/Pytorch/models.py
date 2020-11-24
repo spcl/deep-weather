@@ -167,7 +167,7 @@ class unet3d(LightningModule):
         return x
 
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters(), lr=1e-3)
+        optimizer = torch.optim.Adam(self.parameters(), lr=1e-2)
         scheduler = torch.optim.lr_scheduler.CyclicLR(
             optimizer,
             base_lr=self.base_lr,
@@ -180,7 +180,7 @@ class unet3d(LightningModule):
             scale_mode="cycle",
             cycle_momentum=False,
         )
-        return [optimizer], [scheduler]
+        return [optimizer]  # , [scheduler]
 
     def training_step(self, batch, batch_idx):
         logger.debug("Processing training batch %s", batch_idx)
@@ -205,7 +205,7 @@ class unet3d(LightningModule):
         logger.debug("Processing test batch %s", batch_idx)
         x, y = batch
         out = self(x)
-        loss = self.loss_fct(out, y)
+        loss = torch.nn.MSELoss()(out, y)
         self.log(
             "test_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True
         )

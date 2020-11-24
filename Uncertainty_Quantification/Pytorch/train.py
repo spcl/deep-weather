@@ -41,10 +41,10 @@ def main():
         "--augmentation",
         nargs="+",
         default=[
-            "RandomCrop",
-            "RandomHorizontalFlip",
-            "RandomVerticalFlip",
-            "Transpose",
+            # "RandomCrop",
+            # "RandomHorizontalFlip",
+            # "RandomVerticalFlip",
+            # "Transpose",
         ],
     )
     parser.add_argument(
@@ -67,7 +67,7 @@ def main():
     parser.add_argument("--crop_lat", type=int, default=256)
     parser.add_argument("--batch_size", type=int, default=8)
     parser.add_argument("--base_lr", type=float, default=1e-6)
-    parser.add_argument("--max_lr", type=float, default=1e-3)
+    parser.add_argument("--max_lr", type=float, default=1e-2)
     parser.add_argument("--num_workers", type=int, default=20)
     parser.add_argument("--checkpoint_start", type=str, default=None)
     parser.add_argument("--grad_accumulation", type=int, default=1)
@@ -121,14 +121,16 @@ def main():
             out_channels=1,  # output temperature only
         )
 
+    # --min_epochs 1 --max_epochs 30 --gpus 2 --accelerator ddp --accumulate_grad_batches 1 --resume_from_checkpoint None
     trainer = Trainer(
-        gpus=args.gpus,
-        accelerator="ddp",
-        distributed_backend="ddp",
-        accumulate_grad_batches=args.grad_accumulation,
-        resume_from_checkpoint=args.checkpoint_start,
-        callbacks=[EarlyStopping(monitor="val_loss")],
-    )  # .from_argparse_args(args)
+        #        gpus=args.gpus,
+        #        accelerator="ddp",
+        #        accumulate_grad_batches=args.grad_accumulation,
+        #        resume_from_checkpoint=args.checkpoint_start,
+        #        callbacks=[EarlyStopping(monitor="val_loss")],
+        #        min_epochs=args.min_epochs,
+        #        max_epochs=args.max_epochs,
+    ).from_argparse_args(args)
 
     dm = loader.WDatamodule(args, year_dict=year_dict)
     dm.setup(args)
