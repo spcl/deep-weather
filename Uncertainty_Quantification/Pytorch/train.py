@@ -72,7 +72,7 @@ def main():
     parser.add_argument("--checkpoint_start", type=str, default=None)
     parser.add_argument("--grad_accumulation", type=int, default=1)
     parser.add_argument("--pred_type", type=str, default="Temperature")
-    parser.add_argument("--aggr_type", type=str, default="Mean")
+    parser.add_argument("--aggr_type", type=str, default="Spread", help="Spread | Mean")
     parser.add_argument(
         "--std_folder",
         type=str,
@@ -117,20 +117,19 @@ def main():
             max_lr=args.max_lr,
             in_channels=len(args.parameters)
             * len(args.time_steps)
-            * len(args.perturbations),
+            * 2,  # 2 because we use either the mean or the std + the unperturbed trajectory as input
             out_channels=1,  # output temperature only
         )
 
     # --min_epochs 1 --max_epochs 30 --gpus 2 --accelerator ddp --accumulate_grad_batches 1 --resume_from_checkpoint None
-    trainer = Trainer(
-        #        gpus=args.gpus,
-        #        accelerator="ddp",
-        #        accumulate_grad_batches=args.grad_accumulation,
-        #        resume_from_checkpoint=args.checkpoint_start,
-        #        callbacks=[EarlyStopping(monitor="val_loss")],
-        #        min_epochs=args.min_epochs,
-        #        max_epochs=args.max_epochs,
-    ).from_argparse_args(args)
+    trainer = Trainer.from_argparse_args(args)
+    #        gpus=args.gpus,
+    #        accelerator="ddp",
+    #        accumulate_grad_batches=args.grad_accumulation,
+    #        resume_from_checkpoint=args.checkpoint_start,
+    #        callbacks=[EarlyStopping(monitor="val_loss")],
+    #        min_epochs=args.min_epochs,
+    #        max_epochs=args.max_epochs,
 
     dm = loader.WDatamodule(args, year_dict=year_dict)
     dm.setup(args)

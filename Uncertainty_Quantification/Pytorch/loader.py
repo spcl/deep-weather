@@ -8,6 +8,7 @@ import pytorch_lightning as pl
 
 from utils import (
     reduce_sample_y,
+    reduce_sample_x,
     random_crop,
     horizontal_flip,
     vertical_flip,
@@ -80,15 +81,7 @@ class WeatherDataset(Dataset):
     def __getitem__(self, idx):
 
         data_x = np.load(self.datalist_x[idx])
-        data_x = np.reshape(
-            data_x,
-            [
-                data_x.shape[0] * data_x.shape[1] * data_x.shape[2],
-                data_x.shape[3],
-                data_x.shape[4],
-                data_x.shape[5],
-            ],
-        )
+        data_x = reduce_sample_x(data_x, self.args)
         # crop to work with 5 pooling operations
         data_x = data_x[:, :, : self.args.max_lat, : self.args.max_lon]
         data_x = standardize(data_x, self.means, self.stddevs)
