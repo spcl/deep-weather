@@ -13,15 +13,19 @@ from argparse import ArgumentParser
 
 logger = logging.getLogger(__name__)
 
-BASE_FILTER = 16
+BASE_FILTER = 16  # has to be divideable by 4
+DIM = 2  # For now indicate dim here, possibly implement later
 
 
 class MSSSIMLoss(LightningModule):
     def __init__(self):
         super(MSSSIMLoss, self).__init__()
-        self.msssim = MS_SSIM(
-            data_range=60.0, channel=2
-        )  # after standardization ~0+-60 through analysis, channel = 2 for 2 pressure levels
+        if DIM == 2:
+            self.msssim = MS_SSIM(data_range=60.0, channel=1)
+        else:
+            self.msssim = MS_SSIM(
+                data_range=60.0, channel=2
+            )  # after standardization ~0+-60 through analysis, channel = 2 for 2 pressure levels
 
     def forward(self, x, target):
         return 1.0 - self.msssim(x, target)
@@ -35,16 +39,24 @@ class MixLoss(LightningModule):
         self.alpha = alpha
 
     def forward(self, x, target):
-        x = x[:, 0, :, :, :]
-        target = target[:, 0, :, :, :]
+        if DIM == 3:
+            x = x[:, 0, :, :, :]
+            target = target[:, 0, :, :, :]
         return (1.0 - self.alpha) * self.loss1(x, target) + self.alpha * self.loss2(
             x, target
         )
 
 
 # 3x3x3 convolution module
-def Conv(in_channels, out_channels, filter_sizes=[3,3,3]):
-    return nn.Conv3d(in_channels, out_channels, filter_sizes, padding=(filter_sizes[2]-1)/2)
+def Conv(in_channels, out_channels, filter_sizes=3):
+    if DIM == 2:
+        return nn.Conv2d(
+            in_channels, out_channels, filter_sizes, padding=(filter_sizes - 1) // 2
+        )
+    else:
+        return nn.Conv3d(
+            in_channels, out_channels, filter_sizes, padding=(filter_sizes - 1) // 2
+        )
 
 
 # Activation function
@@ -55,22 +67,67 @@ def activation(x):
 
 # 1x2x2 max pool function
 def pool(x):
-    return F.max_pool3d(x, kernel_size=[1, 2, 2], stride=[1, 2, 2])
+    if DIM == 2:
+        return F.max_pool2d(x, kernel_size=[2, 2], stride=[2, 2])
+    else:
+        return F.max_pool3d(x, kernel_size=[1, 2, 2], stride=[1, 2, 2])
 
 
 # 1x2x2 nearest-neighbor upsample function
 def upsample(x):
-    return F.interpolate(x, scale_factor=[1, 2, 2], mode="trilinear")
+    if DIM == 2:
+        return F.interpolate(x, scale_factor=[2, 2], mode="bilinear")
+    else:
+        return F.interpolate(x, scale_factor=[1, 2, 2], mode="trilinear")
 
 
 # Channel concatenation function
 def concat(a, b):
-    return torch.cat((a, b), 1)
+    return torch.cat((a, b), dim=1)
 
 
-def Conv_br(in_channels, out_channels, filter_sizes=[3,3,3]):
-    #TODO forward or no
-    return 
+def batch_norm(
+    out_channels,
+):  # Does not have the same parameters as the original batch normalization used in the tensorflow 1.14 version of this project
+    if DIM == 2:
+        bnr = torch.nn.BatchNorm2d(out_channels)
+    else:
+        bnr = torch.nn.BatchNorm3d(out_channels)
+    return bnr
+
+
+# Conv Batch Relu module
+class ConvBatchRelu(LightningModule):
+    def __init__(self, in_channels, out_channels, filter_sizes=3):
+        super(ConvBatchRelu, self).__init__()
+        self.conv = Conv(in_channels, out_channels, filter_sizes)
+        self.bnr = batch_norm(out_channels)
+
+    def forward(self, x):
+        x = self.conv(x)
+        x = activation(self.bnr(x))
+        return x
+
+
+# Inception-style layer, without the last convolutional layer used in the original version
+class Incep(LightningModule):
+    def __init__(self, in_channels, out_channels):
+        super(Incep, self).__init__()
+        self.conv1 = Conv(in_channels, out_channels // 4, 1)
+        self.conv3 = Conv(in_channels, out_channels // 4, 3)
+        self.conv5 = Conv(in_channels, out_channels // 4, 5)
+        self.conv7 = Conv(in_channels, out_channels // 4, 7)
+        self.bnr = batch_norm((out_channels // 4) * 3)
+
+    def forward(self, x):
+        x1 = self.conv1(x)
+        x3 = self.conv3(x)
+        x5 = self.conv5(x)
+        x7 = self.conv7(x)
+        x_t = activation(self.bnr(torch.cat((x3, x5, x7), dim=1)))
+        x_f = torch.cat((x_t, x1), dim=1)
+        return x_f
+
 
 # Basic UNet Model
 
@@ -220,21 +277,9 @@ class unet3d(LightningModule):
         return parser
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-class resnet3d_simple(LightningModule):
+class resnet2d_simple(LightningModule):
     def __init__(self, sample_nr, base_lr, max_lr, in_channels=7, out_channels=1):
-        super(unet3d, self).__init__()
+        super(resnet2d_simple, self).__init__()
 
         self.half_cycle_nr = sample_nr // 2
         self.base_lr = base_lr
@@ -249,43 +294,33 @@ class resnet3d_simple(LightningModule):
         ec3 = BASE_FILTER * 4
         ec4 = BASE_FILTER * 5
         ec5 = BASE_FILTER * 7
-        dc5 = BASE_FILTER * 10
-        dc4 = BASE_FILTER * 7
-        dc3 = BASE_FILTER * 6
-        dc2 = BASE_FILTER * 4
-        dc1a = BASE_FILTER * 4
-        dc1b = BASE_FILTER * 2
         oc = out_channels
 
         # Convolutions
-        self.enc_conv0 = Conv(ic, ec1)
-        self.enc_conv1 = Conv(ec1, ec1)
-        self.enc_conv2 = Conv(ec1, ec2)
-        self.enc_conv3 = Conv(ec2, ec3)
-        self.enc_conv4 = Conv(ec3, ec4)
-        self.enc_conv5 = Conv(ec4, ec5)
-        self.dec_conv5a = Conv(ec5 + ec4, dc5)
-        self.dec_conv5b = Conv(dc5, dc5)
-        self.dec_conv4a = Conv(dc5 + ec3, dc4)
-        self.dec_conv4b = Conv(dc4, dc4)
-        self.dec_conv3a = Conv(dc4 + ec2, dc3)
-        self.dec_conv3b = Conv(dc3, dc3)
-        self.dec_conv2a = Conv(dc3 + ec1, dc2)
-        self.dec_conv2b = Conv(dc2, dc2)
-        self.dec_conv1a = Conv(dc2 + ic, dc1a)
-        self.dec_conv1b = Conv(dc1a, dc1b)
-        self.dec_conv0 = Conv(dc1b, oc)
+        self.convBR0 = ConvBatchRelu(ic, ec1)
+        self.convBR1 = ConvBatchRelu(ec1, ec2)
+        self.inc1 = Incep(ec2 + 1, ec3)
+        self.inc2 = Incep(ec3, ec4)
+        self.inc3 = Incep(ec4, ec5)
+        self.inc4 = Incep(ec5, ec5)
+        self.inc5 = Incep(ec5, ec4)
+        self.inc6 = Incep(ec4, ec3)
+        self.conv4 = Conv(ec3 + 1, ec2)
+        self.conv5 = Conv(ec2, oc)
 
     def forward(self, inp):
 
-
-
-
-
-
-
-
-
+        x = self.convBR0(inp)
+        x = self.convBR1(x)
+        x = self.inc1(torch.cat((inp[:, 0, None, :, :], x), dim=1))
+        x = self.inc2(x)
+        x = self.inc3(x)
+        x = self.inc4(x)
+        x = self.inc5(x)
+        x = self.inc6(x)
+        x = self.conv4(torch.cat((inp[:, 0, None, :, :], x), dim=1))
+        x = self.conv5(x)
+        return x
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=1e-2)

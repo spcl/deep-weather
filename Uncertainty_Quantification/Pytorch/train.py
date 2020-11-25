@@ -1,7 +1,7 @@
 from argparse import ArgumentParser
 import loader
 import random
-from models import unet3d
+from models import unet3d, resnet2d_simple
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 
@@ -60,7 +60,8 @@ def main():
         help="Maximum longitude used as crop limit to allow for down and upscaling",
     )
     parser.add_argument("--pressure_levels", nargs="+", default=[500, 850])
-    parser.add_argument("--plvl_used", type=int, default=1)
+    parser.add_argument("--dims", type=int, default=2)
+    parser.add_argument("--plvl_used", nargs="+", default=1)
     parser.add_argument("--time_steps", nargs="+", default=[0, 24, 48])
     parser.add_argument("--perturbations", nargs="+", default=[0, 1, 2, 3, 4])
     parser.add_argument("--crop_lon", type=int, default=256)
@@ -109,6 +110,19 @@ def main():
 
     if args.model_name == "3DUNet":
         model = unet3d(
+            sample_nr=len(
+                loader.WeatherDataset(args, step="train", year_dict=year_dict)
+            )
+            // args.batch_size,
+            base_lr=args.base_lr,
+            max_lr=args.max_lr,
+            in_channels=len(args.parameters)
+            * len(args.time_steps)
+            * 2,  # 2 because we use either the mean or the std + the unperturbed trajectory as input
+            out_channels=1,  # output temperature only
+        )
+    elif args.model_name == "resnet2d_simple":
+        model = resnet2d_simple(
             sample_nr=len(
                 loader.WeatherDataset(args, step="train", year_dict=year_dict)
             )

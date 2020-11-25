@@ -62,6 +62,9 @@ class WeatherDataset(Dataset):
             : self.args.max_lat,
             : self.args.max_lon,
         ]
+        if args.dims == 2:
+            self.stddevs = self.stddevs[:, args.plvl_used, :, :]
+            self.means = self.means[:, args.plvl_used, :, :]
         self.datalist_x.sort()
         self.datalist_y.sort()
 
@@ -82,14 +85,10 @@ class WeatherDataset(Dataset):
 
         data_x = np.load(self.datalist_x[idx])
         data_x = reduce_sample_x(data_x, self.args)
-        # crop to work with 5 pooling operations
-        data_x = data_x[:, :, : self.args.max_lat, : self.args.max_lon]
         data_x = standardize(data_x, self.means, self.stddevs)
         if not self.infer and self.step == "train":
             data_y = np.load(self.datalist_y[idx])
             data_y = reduce_sample_y(data_y, self.args)
-            # crop to work with 5 pooling operations
-            data_y = data_y[:, :, : self.args.max_lat, : self.args.max_lon]
             data_y = standardize(data_y, self.means, self.stddevs)
             for aug in self.args.augmentation:  # Apply transformations if chosen
                 data_x, data_y = TRANSFORMATION_DICTIONARY[aug](
@@ -101,8 +100,6 @@ class WeatherDataset(Dataset):
             if self.step == "val" or self.step == "test":
                 data_y = np.load(self.datalist_y[idx])
                 data_y = reduce_sample_y(data_y, self.args)
-                # crop to work with 5 pooling operations
-                data_y = data_y[:, :, : self.args.max_lat, : self.args.max_lon]
                 data_y = standardize(data_y, self.means, self.stddevs)
                 return torch.from_numpy(data_x), torch.from_numpy(data_y)
             return torch.from_numpy(data_x)
