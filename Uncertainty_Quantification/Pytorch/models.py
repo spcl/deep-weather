@@ -43,8 +43,8 @@ class MixLoss(LightningModule):
 
 
 # 3x3x3 convolution module
-def Conv(in_channels, out_channels):
-    return nn.Conv3d(in_channels, out_channels, 3, padding=1)
+def Conv(in_channels, out_channels, filter_sizes=[3,3,3]):
+    return nn.Conv3d(in_channels, out_channels, filter_sizes, padding=(filter_sizes[2]-1)/2)
 
 
 # Activation function
@@ -67,6 +67,10 @@ def upsample(x):
 def concat(a, b):
     return torch.cat((a, b), 1)
 
+
+def Conv_br(in_channels, out_channels, filter_sizes=[3,3,3]):
+    #TODO forward or no
+    return 
 
 # Basic UNet Model
 
@@ -165,6 +169,123 @@ class unet3d(LightningModule):
         x = self.dec_conv0(x)  # dec_conv0
 
         return x
+
+    def configure_optimizers(self):
+        optimizer = torch.optim.Adam(self.parameters(), lr=1e-2)
+        scheduler = torch.optim.lr_scheduler.CyclicLR(
+            optimizer,
+            base_lr=self.base_lr,
+            max_lr=self.max_lr,
+            step_size_up=self.half_cycle_nr,
+            step_size_down=None,
+            mode="triangular2",
+            gamma=1.0,
+            scale_fn=None,
+            scale_mode="cycle",
+            cycle_momentum=False,
+        )
+        return [optimizer]  # , [scheduler]
+
+    def training_step(self, batch, batch_idx):
+        logger.debug("Processing training batch %s", batch_idx)
+        x, y = batch
+        out = self(x)
+        loss = self.loss_fct(out, y)
+        self.log(
+            "train_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True
+        )
+        return loss
+
+    def validation_step(self, batch, batch_idx):
+        logger.debug("Processing validation batch %s", batch_idx)
+        x, y = batch
+        out = self(x)
+        loss = self.loss_fct(out, y)
+        self.log(
+            "val_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True
+        )
+
+    def test_step(self, batch, batch_idx):
+        logger.debug("Processing test batch %s", batch_idx)
+        x, y = batch
+        out = self(x)
+        loss = torch.nn.MSELoss()(out, y)
+        self.log(
+            "test_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True
+        )
+
+    @staticmethod
+    def add_model_specific_args(parent_parser):
+        parser = ArgumentParser(parents=[parent_parser], add_help=False)
+        return parser
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class resnet3d_simple(LightningModule):
+    def __init__(self, sample_nr, base_lr, max_lr, in_channels=7, out_channels=1):
+        super(unet3d, self).__init__()
+
+        self.half_cycle_nr = sample_nr // 2
+        self.base_lr = base_lr
+        self.max_lr = max_lr
+
+        self.loss_fct = MixLoss(torch.nn.L1Loss(), MSSSIMLoss(), 0.84)
+
+        # Number of channels per layer
+        ic = in_channels
+        ec1 = BASE_FILTER * 2
+        ec2 = BASE_FILTER * 3
+        ec3 = BASE_FILTER * 4
+        ec4 = BASE_FILTER * 5
+        ec5 = BASE_FILTER * 7
+        dc5 = BASE_FILTER * 10
+        dc4 = BASE_FILTER * 7
+        dc3 = BASE_FILTER * 6
+        dc2 = BASE_FILTER * 4
+        dc1a = BASE_FILTER * 4
+        dc1b = BASE_FILTER * 2
+        oc = out_channels
+
+        # Convolutions
+        self.enc_conv0 = Conv(ic, ec1)
+        self.enc_conv1 = Conv(ec1, ec1)
+        self.enc_conv2 = Conv(ec1, ec2)
+        self.enc_conv3 = Conv(ec2, ec3)
+        self.enc_conv4 = Conv(ec3, ec4)
+        self.enc_conv5 = Conv(ec4, ec5)
+        self.dec_conv5a = Conv(ec5 + ec4, dc5)
+        self.dec_conv5b = Conv(dc5, dc5)
+        self.dec_conv4a = Conv(dc5 + ec3, dc4)
+        self.dec_conv4b = Conv(dc4, dc4)
+        self.dec_conv3a = Conv(dc4 + ec2, dc3)
+        self.dec_conv3b = Conv(dc3, dc3)
+        self.dec_conv2a = Conv(dc3 + ec1, dc2)
+        self.dec_conv2b = Conv(dc2, dc2)
+        self.dec_conv1a = Conv(dc2 + ic, dc1a)
+        self.dec_conv1b = Conv(dc1a, dc1b)
+        self.dec_conv0 = Conv(dc1b, oc)
+
+    def forward(self, inp):
+
+
+
+
+
+
+
+
+
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=1e-2)
