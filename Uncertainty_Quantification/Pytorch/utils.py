@@ -24,14 +24,16 @@ def reduce_sample_y(data_y, args):
 
 
 def reduce_sample_x(
-    data_x, args
+    data_x,
+    args,
+    means,
+    stddevs,
 ):  # For now plvl used only works with 2d data, can be scaled to be able to select 3d data later if needed
     # crop to work with 5 pooling operations
     data_x = data_x[:, :, :, :, : args.max_lat, : args.max_lon]
     op = np.mean if args.aggr_type == "Mean" else np.std
-    data_x = np.concatenate(
-        [op(data_x, axis=1, keepdims=True), data_x[:, 0, None, :, :, :, :]], axis=1
-    )
+    stdized = (data_x[:, 0, None, :, :, :, :] - means) / stddevs
+    data_x = np.concatenate([op(data_x, axis=1, keepdims=True), stdized], axis=1)
     if args.dims == 2:
         data_x = data_x[:, :, :, args.plvl_used, :, :]
         data_x = np.reshape(

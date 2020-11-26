@@ -21,10 +21,10 @@ class MSSSIMLoss(LightningModule):
     def __init__(self):
         super(MSSSIMLoss, self).__init__()
         if DIM == 2:
-            self.msssim = MS_SSIM(data_range=60.0, channel=1)
+            self.msssim = MS_SSIM(data_range=4.3, channel=1)
         else:
             self.msssim = MS_SSIM(
-                data_range=60.0, channel=2
+                data_range=4.3, channel=2  # 60 for mean TODO check again
             )  # after standardization ~0+-60 through analysis, channel = 2 for 2 pressure levels
 
     def forward(self, x, target):
