@@ -1,4 +1,4 @@
-name: WeatherTest
+name: Weather
 channels:
   - pytorch
   - anaconda
