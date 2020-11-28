@@ -47,7 +47,7 @@ class WeatherDataset(Dataset):
             np.float32
         )
         self.means = self.means[
-            0,
+            2,
             None,
             :,  # args.parameters.index(args.pred_type),
             :,
@@ -55,7 +55,7 @@ class WeatherDataset(Dataset):
             : self.args.max_lon,
         ]
         self.stddevs = self.stddevs[
-            0,
+            2,
             None,
             :,  # args.parameters.index(args.pred_type),
             :,

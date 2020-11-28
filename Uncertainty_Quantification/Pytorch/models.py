@@ -13,7 +13,7 @@ from argparse import ArgumentParser
 
 logger = logging.getLogger(__name__)
 
-BASE_FILTER = 16  # has to be divideable by 4
+BASE_FILTER = 32  # has to be divideable by 4, originally 16
 DIM = 2  # For now indicate dim here, possibly implement later
 
 
@@ -259,7 +259,13 @@ class unet3d(LightningModule):
         out = self(x)
         loss = self.loss_fct(out, y)
         self.log(
-            "val_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True
+            "val_loss",
+            loss,
+            on_step=True,
+            on_epoch=True,
+            prog_bar=True,
+            logger=True,
+            sync_dist=True,
         )
 
     def test_step(self, batch, batch_idx):
@@ -268,7 +274,13 @@ class unet3d(LightningModule):
         out = self(x)
         loss = torch.nn.MSELoss()(out, y)
         self.log(
-            "test_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True
+            "test_loss",
+            loss,
+            on_step=True,
+            on_epoch=True,
+            prog_bar=True,
+            logger=True,
+            sync_dist=True,
         )
 
     @staticmethod
@@ -296,6 +308,7 @@ class resnet2d_simple(LightningModule):
         ec5 = BASE_FILTER * 7
         oc = out_channels
 
+        # TODO: attention for filter dim
         # Convolutions
         self.convBR0 = ConvBatchRelu(ic, ec1)
         self.convBR1 = ConvBatchRelu(ec1, ec2)
@@ -305,21 +318,23 @@ class resnet2d_simple(LightningModule):
         self.inc4 = Incep(ec5, ec5)
         self.inc5 = Incep(ec5, ec4)
         self.inc6 = Incep(ec4, ec3)
-        self.conv4 = Conv(ec3 + 1, ec2)
-        self.conv5 = Conv(ec2, oc)
+        self.conv4 = Conv(
+            ec3 + 1, oc, 1
+        )  # can be combined to be a single convolution, replace next layer by attention (TODO)
+        # self.conv5 = Conv(ec2, oc, 1)
 
     def forward(self, inp):
 
         x = self.convBR0(inp)
         x = self.convBR1(x)
-        x = self.inc1(torch.cat((inp[:, 0, None, :, :], x), dim=1))
+        x = self.inc1(torch.cat((inp[:, 28, None, :, :], x), dim=1))  # 42
         x = self.inc2(x)
         x = self.inc3(x)
         x = self.inc4(x)
         x = self.inc5(x)
         x = self.inc6(x)
-        x = self.conv4(torch.cat((inp[:, 0, None, :, :], x), dim=1))
-        x = self.conv5(x)
+        x = self.conv4(torch.cat((inp[:, 28, None, :, :], x), dim=1))  # 42
+        # x = self.conv5(x)
         return x
 
     def configure_optimizers(self):
@@ -352,9 +367,15 @@ class resnet2d_simple(LightningModule):
         logger.debug("Processing validation batch %s", batch_idx)
         x, y = batch
         out = self(x)
-        loss = self.loss_fct(out, y)
+        loss = torch.nn.MSELoss()(out, y)  # self.loss_fct(out, y)
         self.log(
-            "val_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True
+            "val_loss",
+            loss,
+            on_step=True,
+            on_epoch=True,
+            prog_bar=True,
+            logger=True,
+            sync_dist=True,
         )
 
     def test_step(self, batch, batch_idx):
@@ -363,7 +384,13 @@ class resnet2d_simple(LightningModule):
         out = self(x)
         loss = torch.nn.MSELoss()(out, y)
         self.log(
-            "test_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True
+            "test_loss",
+            loss,
+            on_step=True,
+            on_epoch=True,
+            prog_bar=True,
+            logger=True,
+            sync_dist=True,
         )
 
     @staticmethod
