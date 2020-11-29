@@ -41,10 +41,10 @@ def main():
         "--augmentation",
         nargs="+",
         default=[
-            "RandomCrop",
+            # "RandomCrop",
             # "RandomHorizontalFlip",
             # "RandomVerticalFlip",
-            "Transpose",
+            # "Transpose",
         ],
     )
     parser.add_argument(
@@ -56,7 +56,7 @@ def main():
     parser.add_argument(
         "--max_lon",
         type=int,
-        default=352,
+        default=702,
         help="Maximum longitude used as crop limit to allow for down and upscaling",
     )
     parser.add_argument("--pressure_levels", nargs="+", default=[500, 850])
