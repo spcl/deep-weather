@@ -46,6 +46,7 @@ def main():
             # "RandomVerticalFlip",
             # "Transpose",
         ],
+        help='["RandomCrop","RandomHorizontalFlip","RandomVerticalFlip","Transpose"]',
     )
     parser.add_argument(
         "--max_lat",

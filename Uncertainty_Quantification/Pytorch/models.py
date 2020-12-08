@@ -351,7 +351,7 @@ class resnet2d_simple(LightningModule):
             scale_mode="cycle",
             cycle_momentum=False,
         )
-        return [optimizer]  # , [scheduler]
+        return [optimizer], [scheduler]
 
     def training_step(self, batch, batch_idx):
         logger.debug("Processing training batch %s", batch_idx)
