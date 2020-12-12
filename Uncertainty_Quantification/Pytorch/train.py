@@ -16,7 +16,12 @@ def main():
     parser = ArgumentParser()
     parser = Trainer.add_argparse_args(parser)
 
-    parser.add_argument("--model_name", type=str, default="3DUNet")
+    parser.add_argument(
+        "--model_name",
+        type=str,
+        default="resnet2d_simple",
+        help="{3DUNet,resnet2d_simple}",
+    )
 
     # To pull the model name
     temp_args, _ = parser.parse_known_args()
@@ -138,13 +143,6 @@ def main():
 
     # --min_epochs 1 --max_epochs 30 --gpus 2 --accelerator ddp --accumulate_grad_batches 1 --resume_from_checkpoint None
     trainer = Trainer.from_argparse_args(args)
-    #        gpus=args.gpus,
-    #        accelerator="ddp",
-    #        accumulate_grad_batches=args.grad_accumulation,
-    #        resume_from_checkpoint=args.checkpoint_start,
-    #        callbacks=[EarlyStopping(monitor="val_loss")],
-    #        min_epochs=args.min_epochs,
-    #        max_epochs=args.max_epochs,
 
     dm = loader.WDatamodule(args, year_dict=year_dict)
     dm.setup(args)

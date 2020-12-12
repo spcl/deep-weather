@@ -85,11 +85,11 @@ class WeatherDataset(Dataset):
 
         data_x = np.load(self.datalist_x[idx])
         data_x = reduce_sample_x(data_x, self.args, self.means, self.stddevs)
-        # data_x = standardize(data_x, self.means, self.stddevs)
+
         if not self.infer and self.step == "train":
             data_y = np.load(self.datalist_y[idx])
             data_y = reduce_sample_y(data_y, self.args)
-            # data_y = standardize(data_y, self.means, self.stddevs)
+
             for aug in self.args.augmentation:  # Apply transformations if chosen
                 data_x, data_y = TRANSFORMATION_DICTIONARY[aug](
                     data_x, data_y, self.args
@@ -100,7 +100,7 @@ class WeatherDataset(Dataset):
             if self.step == "val" or self.step == "test":
                 data_y = np.load(self.datalist_y[idx])
                 data_y = reduce_sample_y(data_y, self.args)
-                # data_y = standardize(data_y, self.means, self.stddevs)
+
                 return torch.from_numpy(data_x), torch.from_numpy(data_y)
             return torch.from_numpy(data_x)
 
