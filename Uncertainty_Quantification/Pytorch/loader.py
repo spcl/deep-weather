@@ -97,7 +97,7 @@ class WeatherDataset(Dataset):
 
             return torch.from_numpy(data_x.copy()), torch.from_numpy(data_y.copy())
         else:
-            if self.step == "val" or self.step == "test":
+            if not self.infer and (self.step == "val" or self.step == "test"):
                 data_y = np.load(self.datalist_y[idx])
                 data_y = reduce_sample_y(data_y, self.args)
 
