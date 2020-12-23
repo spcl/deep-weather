@@ -62,7 +62,7 @@ def main():
     parser.add_argument(
         "--max_lon",
         type=int,
-        default=702,
+        default=704,
         help="Maximum longitude used as crop limit to allow for down and upscaling",
     )
     parser.add_argument("--pressure_levels", nargs="+", default=[500, 850])
@@ -126,6 +126,7 @@ def main():
             * len(args.time_steps)
             * 2,  # 2 because we use either the mean or the std + the unperturbed trajectory as input
             out_channels=1,  # output temperature only
+            args=args,
         )
     elif args.model_name == "resnet2d_simple":
         model = resnet2d_simple(
@@ -139,6 +140,7 @@ def main():
             * len(args.time_steps)
             * 2,  # 2 because we use either the mean or the std + the unperturbed trajectory as input
             out_channels=1,  # output temperature only
+            args=args,
         )
 
     # --min_epochs 1 --max_epochs 30 --gpus 2 --accelerator ddp --accumulate_grad_batches 1 --resume_from_checkpoint None

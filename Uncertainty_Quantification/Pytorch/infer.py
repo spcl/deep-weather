@@ -65,7 +65,7 @@ def main():
     parser.add_argument(
         "--max_lon",
         type=int,
-        default=702,
+        default=704,
         help="Maximum longitude used as crop limit to allow for down and upscaling",
     )
     parser.add_argument("--pressure_levels", nargs="+", default=[500, 850])
