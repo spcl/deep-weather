@@ -23,6 +23,8 @@ pip install -r requirements.txt
 
 We use tensorflow-gpu 1.14, therefore you will also need to install [CUDA 10.0](https://developer.nvidia.com/cuda-10.0-download-archive) and [cuDNN 7.4](https://developer.nvidia.com/cudnn) separately. You will need to register on Nvidia and select 7.4 from the cuDNN versions.  
 
+The newest Uncertainty Quantification models are now also available in PyTorch-Lightning, please refer to the PyTorch [README](Uncertainty_Quantification/Pytorch/README.md)
+
 If you prefer using conda, which will install CUDA and cuDNN automatically, use the commands:  
 ```
 conda create -y --name env python==3.7
