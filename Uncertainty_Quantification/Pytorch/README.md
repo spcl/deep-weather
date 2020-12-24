@@ -29,7 +29,7 @@ To run this code you will have to install the conda or miniconda package manager
 If you have conda installed, but have not set up an environment yet, install it with the following line:
 
 ```
-conda install -f pytorch_environment.yml
+conda env create -f pytorch_environment.yml
 ```
 and activate the environment with
 ```
