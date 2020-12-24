@@ -296,9 +296,10 @@ class unet3d(LightningModule):
 
 
 class resnet2d_simple(LightningModule):
-    def __init__(self, sample_nr, base_lr, max_lr, in_channels=7, out_channels=1):
+    def __init__(self, sample_nr, base_lr, max_lr, in_channels=7, out_channels=1, args=None):
         super(resnet2d_simple, self).__init__()
 
+        self.args = args
         self.half_cycle_nr = sample_nr // 2
         self.base_lr = base_lr
         self.max_lr = max_lr
