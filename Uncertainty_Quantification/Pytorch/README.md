@@ -42,8 +42,7 @@ If you already have a conda environment installed for this project, activate it 
 conda env update --file pytorch_environment.yml
 ```
 
-Once you have your conda environment set up, be sure that you have all the Numpy files generated and ready in the same data folder. The generated mean and standard deviation maps can be left where they were originally generated.
-
+Once you have your conda environment set up, be sure that you have all the Numpy files generated and ready in the same data folder. Mean and spread maps also have to be generated and put in a separate folder from the Numpy files.
 
 ## Training and Inference
 
@@ -62,7 +61,7 @@ for inference.
 To reproduce our results run
 
 ```
-python train.py --min_epochs 1 --max_epochs 10 --accumulate_grad_batches 1 --model_name resnet2d_simple --gpus 1 --batch_size 2 --data_directory YOUR/DIRECTORY
+python train.py --min_epochs 1 --max_epochs 10 --accumulate_grad_batches 1 --model_name resnet2d_simple --gpus 1 --batch_size 2 --data_directory YOUR/DATA/DIRECTORY --std_folder YOUR/STD&MEAN_MAP/FOLDER
 ```
 Per default, the number of pressure levels being used is 1, and therefore, the model is 2d. If you want to switch to using more pressure levels as input, for example with our 3D Unet, set
 ```
