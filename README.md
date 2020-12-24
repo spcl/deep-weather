@@ -46,8 +46,8 @@ We separate our experiments into the exploration of ensemble output bias correct
 To make a combined prediction aimed at reducing the forecast skill (CRPS), you will need to provide a path to the bias corrected mean and ground truth in the appropriate form in [preprocessing_parameters.py](Uncertainty_Quantification/Preprocessing/preprocessing_parameters.py), as well as set the CRPS flag there and in [parameters.py](Uncertainty_Quantification/parameters.py).
 
 ### Contents structure
-`Bias_Correction` Preprocessing and Model for Bias Correction, refer to `Bias_Correction/README.md`
-`Uncertainty_Quantification` Preprocessing and Model for Uncertainty Quantification
+`Bias_Correction` Preprocessing and model for Bias Correction, refer to `Bias_Correction/README.md`
+`Uncertainty_Quantification` Preprocessing and model for Uncertainty Quantification
  - `\parameters.py` All hyperparameters and settings for the model, edit this file to add the paths to your preprocessed data
  - `\predict.py` Evaluates the model on test data
  - `\RESNET2D.py` Our TensorFlow model for Uncertainty Quantification
@@ -58,6 +58,7 @@ To make a combined prediction aimed at reducing the forecast skill (CRPS), you w
     - `\preprocessing_parameters` Parameters for all preprocessing steps, be sure to edit the path folders
     - `\means.npy` Precomputed means for the LAS
     - `\stddevs.npy` Precomputed standard deviations for the LAS
+ - `\Pytorch` PyTorch-Lightning models and training for Uncertainty Quantification, refer to `Pytorch/README.md`
 
 ## How to cite
 ```

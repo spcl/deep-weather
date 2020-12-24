@@ -14,13 +14,13 @@ from argparse import ArgumentParser
 logger = logging.getLogger(__name__)
 
 BASE_FILTER = 32  # has to be divideable by 4, originally 16
-DIM = 2  # For now indicate dim here, possibly implement later
+DIM = 3  # For now indicate dim here, possibly implement later
 
 
 class MSSSIMLoss(LightningModule):
-    def __init__(self):
+    def __init__(self, dim=2):
         super(MSSSIMLoss, self).__init__()
-        if DIM == 2:
+        if dim == 2:
             self.msssim = MS_SSIM(data_range=4.3, channel=1)
         else:
             self.msssim = MS_SSIM(
@@ -32,14 +32,15 @@ class MSSSIMLoss(LightningModule):
 
 
 class MixLoss(LightningModule):
-    def __init__(self, loss1, loss2, alpha):
+    def __init__(self, loss1, loss2, alpha, dim=2):
         super(MixLoss, self).__init__()
         self.loss1 = loss1
         self.loss2 = loss2
         self.alpha = alpha
+        self.dim = dim
 
     def forward(self, x, target):
-        if DIM == 3:
+        if self.dim == 3:
             x = x[:, 0, :, :, :]
             target = target[:, 0, :, :, :]
         return (1.0 - self.alpha) * self.loss1(x, target) + self.alpha * self.loss2(
@@ -48,8 +49,8 @@ class MixLoss(LightningModule):
 
 
 # 3x3x3 convolution module
-def Conv(in_channels, out_channels, filter_sizes=3):
-    if DIM == 2:
+def Conv(in_channels, out_channels, filter_sizes=3, dim=2):
+    if dim == 2:
         return nn.Conv2d(
             in_channels, out_channels, filter_sizes, padding=(filter_sizes - 1) // 2
         )
@@ -66,16 +67,16 @@ def activation(x):
 
 
 # 1x2x2 max pool function
-def pool(x):
-    if DIM == 2:
+def pool(x, dim=2):
+    if dim == 2:
         return F.max_pool2d(x, kernel_size=[2, 2], stride=[2, 2])
     else:
         return F.max_pool3d(x, kernel_size=[1, 2, 2], stride=[1, 2, 2])
 
 
 # 1x2x2 nearest-neighbor upsample function
-def upsample(x):
-    if DIM == 2:
+def upsample(x, dim=2):
+    if dim == 2:
         return F.interpolate(x, scale_factor=[2, 2], mode="bilinear")
     else:
         return F.interpolate(x, scale_factor=[1, 2, 2], mode="trilinear")
@@ -87,9 +88,9 @@ def concat(a, b):
 
 
 def batch_norm(
-    out_channels,
+    out_channels, dim=2
 ):  # Does not have the same parameters as the original batch normalization used in the tensorflow 1.14 version of this project
-    if DIM == 2:
+    if dim == 2:
         bnr = torch.nn.BatchNorm2d(out_channels)
     else:
         bnr = torch.nn.BatchNorm3d(out_channels)
@@ -133,14 +134,19 @@ class Incep(LightningModule):
 
 
 class unet3d(LightningModule):
-    def __init__(self, sample_nr, base_lr, max_lr, in_channels=7, out_channels=1):
+    def __init__(
+        self, sample_nr, base_lr, max_lr, in_channels=7, out_channels=1, args=None
+    ):
         super(unet3d, self).__init__()
 
+        self.dim = args.dims
         self.half_cycle_nr = sample_nr // 2
         self.base_lr = base_lr
         self.max_lr = max_lr
 
-        self.loss_fct = MixLoss(torch.nn.L1Loss(), MSSSIMLoss(), 0.84)
+        self.loss_fct = MixLoss(
+            torch.nn.L1Loss(), MSSSIMLoss(dim=self.dim), 0.84, dim=self.dim
+        )
 
         # Number of channels per layer
         ic = in_channels
@@ -158,23 +164,23 @@ class unet3d(LightningModule):
         oc = out_channels
 
         # Convolutions
-        self.enc_conv0 = Conv(ic, ec1)
-        self.enc_conv1 = Conv(ec1, ec1)
-        self.enc_conv2 = Conv(ec1, ec2)
-        self.enc_conv3 = Conv(ec2, ec3)
-        self.enc_conv4 = Conv(ec3, ec4)
-        self.enc_conv5 = Conv(ec4, ec5)
-        self.dec_conv5a = Conv(ec5 + ec4, dc5)
-        self.dec_conv5b = Conv(dc5, dc5)
-        self.dec_conv4a = Conv(dc5 + ec3, dc4)
-        self.dec_conv4b = Conv(dc4, dc4)
-        self.dec_conv3a = Conv(dc4 + ec2, dc3)
-        self.dec_conv3b = Conv(dc3, dc3)
-        self.dec_conv2a = Conv(dc3 + ec1, dc2)
-        self.dec_conv2b = Conv(dc2, dc2)
-        self.dec_conv1a = Conv(dc2 + ic, dc1a)
-        self.dec_conv1b = Conv(dc1a, dc1b)
-        self.dec_conv0 = Conv(dc1b, oc)
+        self.enc_conv0 = Conv(ic, ec1, dim=self.dim)
+        self.enc_conv1 = Conv(ec1, ec1, dim=self.dim)
+        self.enc_conv2 = Conv(ec1, ec2, dim=self.dim)
+        self.enc_conv3 = Conv(ec2, ec3, dim=self.dim)
+        self.enc_conv4 = Conv(ec3, ec4, dim=self.dim)
+        self.enc_conv5 = Conv(ec4, ec5, dim=self.dim)
+        self.dec_conv5a = Conv(ec5 + ec4, dc5, dim=self.dim)
+        self.dec_conv5b = Conv(dc5, dc5, dim=self.dim)
+        self.dec_conv4a = Conv(dc5 + ec3, dc4, dim=self.dim)
+        self.dec_conv4b = Conv(dc4, dc4, dim=self.dim)
+        self.dec_conv3a = Conv(dc4 + ec2, dc3, dim=self.dim)
+        self.dec_conv3b = Conv(dc3, dc3, dim=self.dim)
+        self.dec_conv2a = Conv(dc3 + ec1, dc2, dim=self.dim)
+        self.dec_conv2b = Conv(dc2, dc2, dim=self.dim)
+        self.dec_conv1a = Conv(dc2 + ic, dc1a, dim=self.dim)
+        self.dec_conv1b = Conv(dc1a, dc1b, dim=self.dim)
+        self.dec_conv0 = Conv(dc1b, oc, dim=self.dim)
 
     def forward(self, inp):
         # Encoder
@@ -182,43 +188,43 @@ class unet3d(LightningModule):
         x = activation(self.enc_conv0(inp))  # enc_conv0
 
         x = activation(self.enc_conv1(x))  # enc_conv1
-        x = pool1 = pool(x)  # pool1
+        x = pool1 = pool(x, dim=self.dim)  # pool1
 
         x = activation(self.enc_conv2(x))  # enc_conv2
-        x = pool2 = pool(x)  # pool2
+        x = pool2 = pool(x, dim=self.dim)  # pool2
 
         x = activation(self.enc_conv3(x))  # enc_conv3
-        x = pool3 = pool(x)  # pool3
+        x = pool3 = pool(x, dim=self.dim)  # pool3
 
         x = activation(self.enc_conv4(x))  # enc_conv4
-        x = pool4 = pool(x)  # pool4
+        x = pool4 = pool(x, dim=self.dim)  # pool4
 
         x = activation(self.enc_conv5(x))  # enc_conv5
-        x = pool(x)  # pool5
+        x = pool(x, dim=self.dim)  # pool5
 
         # Decoder
 
-        x = upsample(x)  # upsample5
+        x = upsample(x, dim=self.dim)  # upsample5
         x = concat(x, pool4)  # concat5
         x = activation(self.dec_conv5a(x))  # dec_conv5a
         x = activation(self.dec_conv5b(x))  # dec_conv5b
 
-        x = upsample(x)  # upsample4
+        x = upsample(x, dim=self.dim)  # upsample4
         x = concat(x, pool3)  # concat4
         x = activation(self.dec_conv4a(x))  # dec_conv4a
         x = activation(self.dec_conv4b(x))  # dec_conv4b
 
-        x = upsample(x)  # upsample3
+        x = upsample(x, dim=self.dim)  # upsample3
         x = concat(x, pool2)  # concat3
         x = activation(self.dec_conv3a(x))  # dec_conv3a
         x = activation(self.dec_conv3b(x))  # dec_conv3b
 
-        x = upsample(x)  # upsample2
+        x = upsample(x, dim=self.dim)  # upsample2
         x = concat(x, pool1)  # concat2
         x = activation(self.dec_conv2a(x))  # dec_conv2a
         x = activation(self.dec_conv2b(x))  # dec_conv2b
 
-        x = upsample(x)  # upsample1
+        x = upsample(x, dim=self.dim)  # upsample1
         x = concat(x, inp)  # concat1
         x = activation(self.dec_conv1a(x))  # dec_conv1a
         x = activation(self.dec_conv1b(x))  # dec_conv1b
