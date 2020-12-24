@@ -82,6 +82,6 @@ At the end of the run, the model will evaluate itself on the test set and print 
 To run inference on your test set, simply run the following
 
 ```
-python infer.py --model_name resnet2d_simple --checkpoint_start lightning_logs/version_XXXX/checkpoints/epoch\=X.ckpt --gpus 1 --output ./YOUR_OUTPUT_FOLDER
+python infer.py --model_name resnet2d_simple --checkpoint_start lightning_logs/version_XXXX/checkpoints/epoch\=X.ckpt --gpus 1 --output ./YOUR_OUTPUT_FOLDER --std_folder YOUR/STD&MEAN_MAP/FOLDER
 ```
 
