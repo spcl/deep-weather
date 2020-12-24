@@ -40,12 +40,12 @@ If you already have a conda environment installed for this project, activate it 
 conda env update --file pytorch_environment.yml
 ```
 
-Once you have your conda environment set up, be sure that you have the Numpy files generated and ready in the same folder.
+Once you have your conda environment set up, be sure that you have all the Numpy files generated and ready in the same data folder.
 
 
 ## Training and Inference
 
-To find the full list of command line arguments, refer to the [documentation]{https://pytorch-lightning.readthedocs.io/en/latest/trainer.html#trainer-class-api} or run
+To find the full list of command line arguments, refer to the [documentation](https://pytorch-lightning.readthedocs.io/en/latest/trainer.html#trainer-class-api) or run
 ```
 python train.py -h
 ```
