@@ -17,6 +17,7 @@ You do not need the TFRecord files for this framework.
 - `\ssim.py` SSIM and MS-SSIM losses
 - `\train.py` Runs the training on our models
 - `\utils.py` Utility functions for dataloading and augmentation
+- `\pytorch_environment.yml` Our conda environment file
 
 ### Prerequisites
 
