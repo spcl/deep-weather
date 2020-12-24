@@ -7,6 +7,7 @@ Therefore, our latest models and data augmentation steps are made accessible in 
 
 To run the PyTorch models and add your own, first be sure to use the preprocessing code to generate Numpy files from the raw GRIB files.
 You do not need the TFRecord files for this framework.
+Be sure to also have generated the LAS mean and standard deviation maps.
 
 ### Structure
 
@@ -41,7 +42,7 @@ If you already have a conda environment installed for this project, activate it 
 conda env update --file pytorch_environment.yml
 ```
 
-Once you have your conda environment set up, be sure that you have all the Numpy files generated and ready in the same data folder.
+Once you have your conda environment set up, be sure that you have all the Numpy files generated and ready in the same data folder. The generated mean and standard deviation maps can be left where they were originally generated.
 
 
 ## Training and Inference
