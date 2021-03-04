@@ -40,6 +40,8 @@ For the full separate datasets refer to their original sources:
 - [ENS10](https://confluence.ecmwf.int/display/UDOC/ECMWF+ENS+for+Machine+Learning+%28ENS4ML%29+Dataset)
 - [ERA5](https://cds.climate.copernicus.eu/cdsapp#!/dataset/reanalysis-era5-pressure-levels?tab=form)
 
+- [Alternate link](http://spclstorage.inf.ethz.ch/projects/deep-weather/) in case the previous ones do not work.
+
 To transform the Deep Weather data into Numpy arrays and TensorFlow records as done for our paper, refer to our preprocessing steps. If you want to use different parameters directly from the original sources you will have to edit the preprocessing scripts.
 
 ## Contents
