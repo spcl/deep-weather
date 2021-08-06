@@ -34,10 +34,8 @@ pip install eccodes==0.9.5
 ```
 
 ## Data
-The raw GRIB data we used for our experiments is available under the [Deep Weather Dataset](http://spclstorage.inf.ethz.ch/projects/deep-weather/).  
-
-For the full separate datasets refer to their original sources:
-- [ENS10](https://confluence.ecmwf.int/display/UDOC/ECMWF+ENS+for+Machine+Learning+%28ENS4ML%29+Dataset)
+The raw GRIB data we used for our experiments is available at:
+- [ENS10](https://confluence.ecmwf.int/display/UDOC/ECMWF+ENS+for+Machine+Learning+%28ENS4ML%29+Dataset) - easily download and use via the [CliMetLab plugin](https://github.com/spcl/climetlab-maelstrom-ens10).
 - [ERA5](https://cds.climate.copernicus.eu/cdsapp#!/dataset/reanalysis-era5-pressure-levels?tab=form)
 
 - [Alternate link](http://spclstorage.inf.ethz.ch/projects/deep-weather/) in case the previous ones do not work. (The ENS10 data files are marked with 2018, but contain the data of all years described in our paper)
