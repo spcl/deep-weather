@@ -44,5 +44,5 @@ class RMSETerminalBarEvent(TerminalBarEvent):
 
         self.bar.close()
 
-        print('Epoch {} RMSE Loss : {} - Best RMSE Loss: {} \n'.format(
+        print('\n Epoch {} RMSE Loss : {} - Best RMSE Loss: {} \n'.format(
             self._epoch, rmse_epoch_loss, self.best_loss))
