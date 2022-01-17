@@ -1,6 +1,6 @@
-#[Deep500](https://www.deep500.org) Recipe for Uncertainty Quantification
+#Deep500 Recipe for Uncertainty Quantification
 
-Deep500 is A modular benchmarking infrastructure for 
+[Deep500](https://www.deep500.org)  is A modular benchmarking infrastructure for 
 high-performance deep learning — from the single operator 
 to distributed training. In this directory, we  reproduce the result of
 *uncertainty quantification* task using deep500 recipe.
