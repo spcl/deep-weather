@@ -20,3 +20,16 @@ Now, you can train the model using the following:
 ```
 python recipe_UQ.py  --data_directory YOUR/DATA/DIRECTORY   --std_folder YOUR/STD&MEAN_MAP/FOLDER  --batch_size 2 --epochs 6  --fix_split True
 ```
+
+
+## Dataset
+
+The data should be downloaded as stated [here](https://github.com/spcl/deep-weather#data). 
+`mean.npy` and `stddevs.npy` is also needed (you can find them [here](https://github.com/spcl/deep-weather/tree/master/Uncertainty_Quantification/Preprocessing)).
+The data has 5 dimensions with the following attributes:
+
+- `Time (3)`: The data for 0, 24h, and 48h
+- `Type (7)`: Temperature, Geopotential, U component of wind, V component of wind, Divergence, Vertical velocity, and Specific humidity  
+- `Pressure Level (2)`: 500 and 850hpa.
+- `Latitude (361)`
+- `Longitude (720)`
