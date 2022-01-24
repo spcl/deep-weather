@@ -7,6 +7,7 @@ import re
 from torch.utils.data import Dataset
 from deep500.lv2.dataset import Dataset as D500Dataset
 from deep500.lv2.sampler import ShuffleSampler
+from utils import UQDataclass
 
 from utils import (
     reduce_sample_y,
@@ -27,7 +28,12 @@ TRANSFORMATION_DICTIONARY = {
 
 
 class WeatherDataset(Dataset):
-    def __init__(self, args, step="train", infer=False, year_dict=None):
+
+    def __init__(self,
+                 step="train",
+                 infer=False,
+                 year_dict=None,
+                 args: UQDataclass = None):
         self.args = args
         data_list = os.listdir(args.data_directory)
         pat_x = ["inputLST" + i for i in year_dict[step]]
@@ -78,13 +84,10 @@ class WeatherDataset(Dataset):
             data_y = np.load(self.datalist_y[idx])
             data_y = reduce_sample_y(data_y, self.args)
 
-            for aug in self.args.augmentation:  # Apply transformations if chosen
-                data_x, data_y = TRANSFORMATION_DICTIONARY[aug](data_x, data_y,
-                                                                self.args)
-
             return torch.from_numpy(data_x.copy()), torch.from_numpy(
                 data_y.copy())
         else:
+
             if not self.infer and (self.step == "val" or self.step == "test"):
                 data_y = np.load(self.datalist_y[idx])
                 data_y = reduce_sample_y(data_y, self.args)
@@ -94,13 +97,14 @@ class WeatherDataset(Dataset):
 
 
 class D500WeatherDataset(D500Dataset):
+
     def __init__(self,
-                 args,
                  sample_node: str,
                  label_node: str,
                  step="train",
                  infer=False,
-                 year_dict=None):
+                 year_dict=None,
+                 args: UQDataclass = None):
         super().__init__()
         self.args = args
         self.input_node = sample_node
@@ -155,9 +159,6 @@ class D500WeatherDataset(D500Dataset):
             data_y = np.load(self.datalist_y[idx])
             data_y = reduce_sample_y(data_y, self.args)
 
-            for aug in self.args.augmentation:  # Apply transformations if chosen
-                data_x, data_y = TRANSFORMATION_DICTIONARY[aug](data_x, data_y,
-                                                                self.args)
             return data_x.copy(), data_y.copy()
         else:
             if not self.infer and (self.step == "val" or self.step == "test"):
@@ -170,14 +171,18 @@ class D500WeatherDataset(D500Dataset):
 
 
 class WeatherShuffleSampler(ShuffleSampler):
+
     def __init__(self,
                  dataset: Dataset,
                  batch_size: int,
                  seed: int = None,
                  drop_last_batch: bool = True,
-                 events=None):
+                 events=None,
+                 args: UQDataclass = None):
+
         super().__init__(dataset, batch_size, seed, drop_last_batch, events)
         self.batch_idx = 0
+        self.args = args
 
     def __next__(self):
 
@@ -198,6 +203,11 @@ class WeatherShuffleSampler(ShuffleSampler):
             data_x = curr_data[0]
             data_y = curr_data[1]
 
+            if self.args is not None:
+                for aug in self.args.augmentation:  # Apply transformations if chosen
+                    data_x, data_y = TRANSFORMATION_DICTIONARY[aug](data_x, data_y,
+                                                                self.args)
+
             batch_data.append(data_x)
             batch_label.append(data_y)
 
@@ -215,7 +225,10 @@ class WeatherShuffleSampler(ShuffleSampler):
 
 
 class CallableD500WeatherDataset:
-    def __init__(self, args):
+
+    def __init__(self, args: UQDataclass = None):
+
+        self.args = args
 
         YEARS = [str(i) for i in range(1999, 2018)]
         year_dict = {}
@@ -232,14 +245,14 @@ class CallableD500WeatherDataset:
             ]
 
         self.train_set = D500WeatherDataset(
-            args,
+            args=self.args,
             sample_node="input",
             label_node="label",
             step="train",
             year_dict=year_dict,
         )
         self.test_set = D500WeatherDataset(
-            args,
+            args=self.args,
             sample_node="input",
             label_node="label",
             step="test",

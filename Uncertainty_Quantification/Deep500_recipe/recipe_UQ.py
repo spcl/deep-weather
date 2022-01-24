@@ -16,8 +16,6 @@ from losses import *
 import loader
 from scheduler import CyclicLRScheduler
 
-args = args_parser()
-
 
 def model(batch_size, in_channels, out_channels, classes=None, shape=None):
     net = resnet2d_simple(
@@ -30,7 +28,7 @@ def model(batch_size, in_channels, out_channels, classes=None, shape=None):
 def executor():
     mod, _, _ = model(
         None,
-        in_channels=len(args.parameters) * len(args.time_steps) * 2,
+        in_channels=len(cfg.parameters) * len(cfg.time_steps) * 2,
         out_channels=1,
         classes=None,
         shape=None,
@@ -40,49 +38,59 @@ def executor():
 
 
 # Fixed Components
-FIXED = {
-    "model": model,
-    "model_kwargs": {
-        "in_channels": len(args.parameters) * len(args.time_steps) * 2,
-        "out_channels": 1,
-    },
-    "dataset": loader.CallableD500WeatherDataset(args),
-    "epochs": args.epochs,
-}
+def fixed_components_gen(cfg: UQDataclass):
+    return {
+        "model": model,
+        "model_kwargs": {
+            "in_channels": len(cfg.parameters) * len(cfg.time_steps) * 2,
+            "out_channels": 1,
+        },
+        "dataset": loader.CallableD500WeatherDataset(cfg),
+        "epochs": cfg.epochs,
+    }
+
 
 # Mutable Components
-MUTABLE = {
-    "batch_size": args.batch_size,
-    "executor": executor(),
-    "executor_kwargs": dict(device=d5.GPUDevice()),
-    "train_sampler": loader.WeatherShuffleSampler,
-    "train_sampler_kwargs": dict(seed=args.seed),
-    "validation_sampler": loader.WeatherShuffleSampler,
-    "validation_sampler_kwargs": dict(seed=args.seed),
-    "optimizer": d5fw.AdamOptimizer,
-    "optimizer_kwargs": dict(learning_rate=1e-2),
-    "events": [
-        RMSETerminalBarEvent(loader.CallableD500WeatherDataset(args).test_set,
-                             loader.WeatherShuffleSampler,
-                             batch_size=args.batch_size),
-        CyclicLRScheduler(
-            per_epoch=True,
-            base_lr=args.base_lr,
-            max_lr=args.max_lr,
-            step_size_up=(len(loader.CallableD500WeatherDataset(args)) //
-                          args.batch_size) // 2,
-            step_size_down=None,
-            mode="triangular2",
-            gamma=1.0,
-            scale_fn=None,
-            scale_mode="cycle",
-            cycle_momentum=False,
-        ),
-    ],
-}
+def mutable_components_gen(cfg: UQDataclass):
 
-# Acceptable Metrics
-METRICS = []
+    return {
+        "batch_size": cfg.batch_size,
+        "executor": executor(),
+        "executor_kwargs": dict(device=d5.GPUDevice()),
+        "train_sampler": loader.WeatherShuffleSampler,
+        "train_sampler_kwargs": dict(seed=cfg.seed, args=cfg),
+        "validation_sampler": loader.WeatherShuffleSampler,
+        "validation_sampler_kwargs": dict(seed=cfg.seed, args=cfg),
+        "optimizer": d5fw.AdamOptimizer,
+        "optimizer_kwargs": dict(learning_rate=1e-2),
+        "events": [
+            RMSETerminalBarEvent(
+                loader.CallableD500WeatherDataset(cfg).test_set,
+                loader.WeatherShuffleSampler,
+                batch_size=cfg.batch_size),
+            CyclicLRScheduler(
+                per_epoch=True,
+                base_lr=cfg.base_lr,
+                max_lr=cfg.max_lr,
+                step_size_up=(len(loader.CallableD500WeatherDataset(cfg)) //
+                              cfg.batch_size) // 2,
+                step_size_down=None,
+                mode="triangular2",
+                gamma=1.0,
+                scale_fn=None,
+                scale_mode="cycle",
+                cycle_momentum=False,
+            ),
+        ],
+    }
+
 
 if __name__ == "__main__":
+
+    cfg = args_parser()
+
+    METRICS = []
+    FIXED = fixed_components_gen(cfg)
+    MUTABLE = mutable_components_gen(cfg)
+
     d5.run_recipe(FIXED, MUTABLE, METRICS) or exit(1)

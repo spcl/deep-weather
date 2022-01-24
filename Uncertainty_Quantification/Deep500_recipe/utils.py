@@ -4,6 +4,136 @@ import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
 from argparse import ArgumentParser
+from typing import Any, List, Optional
+
+from dataclasses import dataclass, field
+
+
+@dataclass()
+class UQDataclass:
+
+    model_name: str = field(default="resnet2d_simple",
+                            metadata={'help': "{3DUNet, resnet2d_simple}"})
+
+    seed: int = field(default=42,
+                      metadata={'help': "Random Seed (default: 42)"})
+
+    epochs: int = field(default=1,
+                        metadata={'help': "Number of Epochs (default: 1)"})
+
+    data_directory: str = field(
+        default="/users/petergro/RSTA_DATA",
+        metadata={'help': 'Pass your data directoy here'})
+    std_folder: str = field(
+        default="/users/petergro/std",
+        metadata={
+            'help':
+            'Folder with the means.npy and stddevs.npy files generated in the data generation'
+        })
+
+    parameters: List[str] = field(
+        default_factory=lambda: [
+            "Temperature",
+            "SpecHum",
+            "VertVel",
+            "U",
+            "V",
+            "Geopotential",
+            "Divergence",
+        ],
+        metadata={'help': 'The parameters that will be used'})
+
+    augmentation: List[str] = field(
+        default_factory=lambda: [],
+        metadata={
+            'help':
+            '["RandomCrop","RandomHorizontalFlip","RandomVerticalFlip","Transpose"]'
+        })
+
+    max_lat: int = field(
+        default=352,
+        metadata={
+            'help':
+            'Maximum latitude used as crop limit to allow for down and upscaling'
+        })
+
+    max_lon: int = field(
+        default=704,
+        metadata={
+            'help':
+            'Maximum longitude used as crop limit to allow for down and upscaling'
+        })
+
+    pressure_levels: List[int] = field(
+        default_factory=lambda: [500, 850],
+        metadata={'help': 'What pressure levels are available'})
+
+    dims: int = field(
+        default=2,
+        metadata={'help': 'How many dimensions are we predicting in, 2 or 3'})
+
+    plvl_used: int = field(
+        default=1,
+        metadata={
+            'help':
+            'if --dims is 2, which pressure level are we predicting (index)'
+        })
+
+    time_steps: List[int] = field(
+        default_factory=lambda: [0, 24, 48],
+        metadata={'help': 'List of timesteps that are available to use'})
+
+    perturbations: List[int] = field(
+        default_factory=lambda: [0, 1, 2, 3, 4],
+        metadata={
+            'help': 'What are the perturbation numbers that we are using'
+        })
+
+    crop_lon: int = field(
+        default=256,
+        metadata={
+            'help':
+            'What is the crop size in longitude points for the random crop'
+        })
+
+    crop_lat: int = field(
+        default=256,
+        metadata={
+            'help':
+            'What is the crop size in latitude points for the random crop'
+        })
+
+    batch_size: int = field(default=2, metadata={'help': 'The batch size'})
+
+    base_lr: float = field(
+        default=1e-6,
+        metadata={
+            'help':
+            'Base learning rate for the cyclical learning rate scheduler'
+        })
+
+    max_lr: float = field(
+        default=1e-2,
+        metadata={
+            'help':
+            'Maximum learning rate for the cyclical learning rate scheduler'
+        })
+
+    num_workers: int = field(
+        default=8, metadata={'help': 'Set the number of dataloader workers'})
+
+    pred_type: str = field(
+        default='Temperature',
+        metadata={'help': 'Which parameter is being predicted'})
+
+    aggr_type: str = field(default='Spread',
+                           metadata={'help': 'Spread | Mean'})
+
+    fix_split: bool = field(
+        default=True,
+        metadata={
+            'help': 'Whether the train, val, test split are random or fixed'
+        })
 
 
 def args_parser():
@@ -146,12 +276,12 @@ def args_parser():
         help="Set the number of dataloader workers",
     )
     # TODO: gradient accumulator
-    parser.add_argument(
-        "--grad_accumulation",
-        type=int,
-        default=1,
-        help="How many gradient passes should be accumulated",
-    )
+    # parser.add_argument(
+    #     "--grad_accumulation",
+    #     type=int,
+    #     default=1,
+    #     help="How many gradient passes should be accumulated",
+    # )
     parser.add_argument(
         "--pred_type",
         type=str,
@@ -181,7 +311,7 @@ def args_parser():
 
     args = parser.parse_args()
 
-    return args
+    return UQDataclass(**vars(args))
 
 
 def reduce_sample_x(
