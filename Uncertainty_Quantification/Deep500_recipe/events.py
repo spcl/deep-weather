@@ -10,7 +10,7 @@ class RMSETerminalBarEvent(TerminalBarEvent):
     def __init__(self, ds, sampler, batch_size: int = 64):
         super().__init__()
         self.ds = ds
-        self.sampel_ds = sampler(self.ds, batch_size=batch_size)
+        self.sample_ds = sampler(self.ds, batch_size=batch_size)
         self.batch_size = batch_size
         self.best_loss = math.inf
 
@@ -24,7 +24,7 @@ class RMSETerminalBarEvent(TerminalBarEvent):
 
         acc_loss = 0
 
-        for idx, inp in enumerate(self.sampel_ds):
+        for idx, inp in enumerate(self.sample_ds):
 
             out = runner.executor.inference(inp)
             output = out[runner.network_output]
@@ -35,12 +35,12 @@ class RMSETerminalBarEvent(TerminalBarEvent):
             acc_loss += batch_loss
 
         mse_epoch_loss = acc_loss
-        rmse_epoch_loss = math.sqrt(mse_epoch_loss / len(self.sampel_ds))
+        rmse_epoch_loss = math.sqrt(mse_epoch_loss / len(self.sample_ds))
 
         if self.best_loss > rmse_epoch_loss:
             self.best_loss = rmse_epoch_loss
 
-        self.sampel_ds.reset()
+        self.sample_ds.reset()
 
         self.bar.close()
 

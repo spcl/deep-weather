@@ -5,7 +5,7 @@ import numpy as np
 import random
 import re
 from torch.utils.data import Dataset
-from deep500.lv2.dataset import Dataset as d500Dataset
+from deep500.lv2.dataset import Dataset as D500Dataset
 from deep500.lv2.sampler import ShuffleSampler
 
 from utils import (
@@ -93,7 +93,7 @@ class WeatherDataset(Dataset):
             return torch.from_numpy(data_x)
 
 
-class d500_WeatherDataset(d500Dataset):
+class D500WeatherDataset(D500Dataset):
     def __init__(self,
                  args,
                  sample_node: str,
@@ -195,8 +195,11 @@ class WeatherShuffleSampler(ShuffleSampler):
         batch_label = []
         for idx in batch_idx:
             curr_data = self.dataset[idx]
-            batch_data.append(curr_data[0])
-            batch_label.append(curr_data[1])
+            data_x = curr_data[0]
+            data_y = curr_data[1]
+
+            batch_data.append(data_x)
+            batch_label.append(data_y)
 
         batch = {'input': np.array(batch_data), 'label': np.array(batch_label)}
 
@@ -211,7 +214,7 @@ class WeatherShuffleSampler(ShuffleSampler):
         self.batch_idx = 0
 
 
-class callable_weather_dataset:
+class CallableD500WeatherDataset:
     def __init__(self, args):
 
         YEARS = [str(i) for i in range(1999, 2018)]
@@ -228,14 +231,14 @@ class callable_weather_dataset:
                 i for e, i in enumerate(YEARS) if 1 < e < (len(YEARS) - 1)
             ]
 
-        self.train_set = d500_WeatherDataset(
+        self.train_set = D500WeatherDataset(
             args,
             sample_node="input",
             label_node="label",
             step="train",
             year_dict=year_dict,
         )
-        self.test_set = d500_WeatherDataset(
+        self.test_set = D500WeatherDataset(
             args,
             sample_node="input",
             label_node="label",

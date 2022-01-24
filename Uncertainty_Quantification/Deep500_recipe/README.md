@@ -8,10 +8,10 @@ to distributed training. In this directory, we  reproduce the result of
 
 ## Usage
 
-To run the code, you need to install Deep500 using the following line:
+To run the code, you need to install [Deep500](https://github.com/deep500/deep500). Then, install  `pytorch_msssim` using the following line:
 
 ```
-pip install deep500
+pip install pytorch_msssim
 ```
 
 
@@ -28,7 +28,7 @@ The data should be downloaded as stated [here](https://github.com/spcl/deep-weat
 `mean.npy` and `stddevs.npy` is also needed (you can find them [here](https://github.com/spcl/deep-weather/tree/master/Uncertainty_Quantification/Preprocessing)).
 The data has 5 dimensions with the following attributes:
 
-- `Time (3)`: The data for 0, 24h, and 48h
+- `Leadtime (3)`: The data for 0, 24h, and 48h
 - `Type (7)`: Temperature, Geopotential, U component of wind, V component of wind, Divergence, Vertical velocity, and Specific humidity  
 - `Pressure Level (2)`: 500 and 850hpa.
 - `Latitude (361)`

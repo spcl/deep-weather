@@ -46,39 +46,30 @@ FIXED = {
         "in_channels": len(args.parameters) * len(args.time_steps) * 2,
         "out_channels": 1,
     },
-    "dataset": loader.callable_weather_dataset(args),
+    "dataset": loader.CallableD500WeatherDataset(args),
     "epochs": args.epochs,
 }
 
 # Mutable Components
 MUTABLE = {
-    "batch_size":
-    args.batch_size,
-    "executor":
-    executor(),
-    "executor_kwargs":
-    dict(device=d5.GPUDevice()),
-    "train_sampler":
-    loader.WeatherShuffleSampler,
-    "train_sampler_kwargs":
-    dict(seed=args.seed),
-    "validation_sampler":
-    loader.WeatherShuffleSampler,
-    "validation_sampler_kwargs":
-    dict(seed=args.seed),
-    "optimizer":
-    d5fw.AdamOptimizer,
-    "optimizer_kwargs":
-    dict(learning_rate=1e-2),
+    "batch_size": args.batch_size,
+    "executor": executor(),
+    "executor_kwargs": dict(device=d5.GPUDevice()),
+    "train_sampler": loader.WeatherShuffleSampler,
+    "train_sampler_kwargs": dict(seed=args.seed),
+    "validation_sampler": loader.WeatherShuffleSampler,
+    "validation_sampler_kwargs": dict(seed=args.seed),
+    "optimizer": d5fw.AdamOptimizer,
+    "optimizer_kwargs": dict(learning_rate=1e-2),
     "events": [
-        RMSETerminalBarEvent(loader.callable_weather_dataset(args).test_set,
+        RMSETerminalBarEvent(loader.CallableD500WeatherDataset(args).test_set,
                              loader.WeatherShuffleSampler,
                              batch_size=args.batch_size),
         CyclicLRScheduler(
             per_epoch=True,
             base_lr=args.base_lr,
             max_lr=args.max_lr,
-            step_size_up=(len(loader.callable_weather_dataset(args)) //
+            step_size_up=(len(loader.CallableD500WeatherDataset(args)) //
                           args.batch_size) // 2,
             step_size_down=None,
             mode="triangular2",
