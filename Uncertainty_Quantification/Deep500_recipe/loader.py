@@ -7,7 +7,7 @@ import re
 from torch.utils.data import Dataset
 from deep500.lv2.dataset import Dataset as D500Dataset
 from deep500.lv2.sampler import ShuffleSampler
-from utils import UQDataclass
+from utils import UQDataClass
 
 from utils import (
     reduce_sample_y,
@@ -33,7 +33,7 @@ class WeatherDataset(Dataset):
                  step="train",
                  infer=False,
                  year_dict=None,
-                 args: UQDataclass = None):
+                 args: UQDataClass = None):
         self.args = args
         data_list = os.listdir(args.data_directory)
         pat_x = ["inputLST" + i for i in year_dict[step]]
@@ -104,7 +104,7 @@ class D500WeatherDataset(D500Dataset):
                  step="train",
                  infer=False,
                  year_dict=None,
-                 args: UQDataclass = None):
+                 args: UQDataClass = None):
         super().__init__()
         self.args = args
         self.input_node = sample_node
@@ -178,7 +178,7 @@ class WeatherShuffleSampler(ShuffleSampler):
                  seed: int = None,
                  drop_last_batch: bool = True,
                  events=None,
-                 args: UQDataclass = None):
+                 args: UQDataClass = None):
 
         super().__init__(dataset, batch_size, seed, drop_last_batch, events)
         self.batch_idx = 0
@@ -226,7 +226,7 @@ class WeatherShuffleSampler(ShuffleSampler):
 
 class CallableD500WeatherDataset:
 
-    def __init__(self, args: UQDataclass = None):
+    def __init__(self, args: UQDataClass = None):
 
         self.args = args
 

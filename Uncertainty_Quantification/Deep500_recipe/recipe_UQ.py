@@ -38,7 +38,7 @@ def executor():
 
 
 # Fixed Components
-def fixed_components_gen(cfg: UQDataclass):
+def fixed_components_gen(cfg: UQDataClass):
     return {
         "model": model,
         "model_kwargs": {
@@ -51,7 +51,7 @@ def fixed_components_gen(cfg: UQDataclass):
 
 
 # Mutable Components
-def mutable_components_gen(cfg: UQDataclass):
+def mutable_components_gen(cfg: UQDataClass):
 
     return {
         "batch_size": cfg.batch_size,

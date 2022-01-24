@@ -10,7 +10,7 @@ from dataclasses import dataclass, field
 
 
 @dataclass()
-class UQDataclass:
+class UQDataClass:
 
     model_name: str = field(default="resnet2d_simple",
                             metadata={'help': "{3DUNet, resnet2d_simple}"})
@@ -311,7 +311,7 @@ def args_parser():
 
     args = parser.parse_args()
 
-    return UQDataclass(**vars(args))
+    return UQDataClass(**vars(args))
 
 
 def reduce_sample_x(
